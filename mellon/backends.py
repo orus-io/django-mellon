@@ -5,6 +5,7 @@ from . import utils
 
 class SAMLBackend(ModelBackend):
     def authenticate(self, saml_attributes):
+        # without an issuer we can do nothing
         if not 'issuer' in saml_attributes:
             return
         idp = utils.get_idp(saml_attributes['issuer'])
@@ -13,13 +14,15 @@ class SAMLBackend(ModelBackend):
             if not hasattr(adapter, 'authorize'):
                 continue
             if not adapter.authorize(idp, saml_attributes):
-                return False
+                return
         for adapter in adapters:
             if not hasattr(adapter, 'lookup_user'):
                 continue
             user = adapter.lookup_user(idp, saml_attributes)
             if user:
                 break
+        else: # no user found
+            return
         for adapter in adapters:
             if not hasattr(adapter, 'provision'):
                 continue
