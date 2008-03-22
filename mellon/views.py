@@ -7,8 +7,6 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect, resolve_url
 from django.utils.http import same_origin
-from django.utils.translation import ugettext as _
-from django.contrib import messages
 
 import lasso
 
