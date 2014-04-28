@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<p>
+  {% blocktrans with name_id=saml_attributes.name_id_content %}No user found for NameID {{ name_id  }}{% endblocktrans %}
+</p>
+<pre style="display: none">
+{{ saml_attributes|pprint }}
+</pre>
+{% endblock %}

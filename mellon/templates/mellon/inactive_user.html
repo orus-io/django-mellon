@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<p>
+  {% blocktrans with name_id=saml_attributes.name_id_content %}Your user, {{ user }}, 
+  is inactive please contact your administrator.
+  {% endblocktrans %}
+</p>
+{% endblock %}

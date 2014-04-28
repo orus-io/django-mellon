@@ -1,0 +1,217 @@
+django-mellon
+=============
+
+SAML 2.0 authentication for Django
+
+Usage
+=====
+
+You need to have the Python binding for the Lasso library installed, you can
+find source and package for Debian on http://lasso.entrouvert.org/download/.
+
+Add mellon to your installed apps::
+
+    INSTALLED_APPS = (
+       ...
+       'mellon',
+    )
+
+Add the SAMLBacked to your authentication backends::
+
+    AUTHENTICATION_BACKENDS = (
+        ...
+        'mellon.backends.SAMLBackend',
+    )
+
+Add mellon urls to your urls::
+
+    urlpatterns = patterns('',
+        ...
+        url(r'^/accounts/mellon', include('mellon.urls')),
+    )
+
+If SAML 2.0 should be your only authentication method you can define `mellon_login` as you main `LOGIN_URL`::
+
+    LOGIN_URL = 'mellon_login'
+
+Yout metadata will be downloadable through HTTP on 
+
+    http://youapplication/base/accounts/mellon/metadata
+
+If your identity provider ask for your assertion consumer URL it's on
+
+    http://youapplication/base/accounts/mellon/login
+
+If your identity provider ask for your logout URL it's on
+
+    http://youapplication/base/accounts/mellon/logout
+
+Session
+=======
+
+After an authentication attributes are stored in the session using a
+dictionnary, the key is `mellon_session`. The dictionnary contains:
+
+ - issuer: the EntityID of the identity provider
+ - name_id_content: the value of the NameID
+ - name_id_format: the format of the NameID
+ - authn_instant: the ISO8601 date of the authentication on the identity provider, optional.
+ - session_not_on_or_after: the ISO8691 date after which the local
+   session should be closed. Note that we automatically set the
+   expiration of the Django session to this value if it's available.
+ - authn_context_class_ref: the authentication method of the current
+   authentication on the identity provider. You can restrict
+   authorized authentication methods using the setting
+   `MELLON_AUTHN_CLASSREF`.
+ - all attributes extracted from the assertion.
+
+Settings
+========
+
+All generic setting apart from `MELLON_IDENTITY_PROVIDERS` can be
+overridden in the identity provider settings by removing the
+`MELLON_` prefix.
+
+MELLON_IDENTITY_PROVIDERS
+-------------------------
+
+A list of dictionaries, only one key is mandatory in those
+dictionaries `METADATA` it should contain the UTF-8 content of the
+metadata file of the identity provider or if it starts with a slash
+the absolute path toward a metadata file. All other keys are override
+of generic settings.
+
+MELLON_PUBLIC_KEYS
+------------------
+
+List of public keys of this service provider, add multiple keys for
+doing key roll-over
+
+MELLON_PRIVATE_KEY
+------------------
+
+The PKCS#8 PEM encoded private key, if not provided request will not
+be signed.
+
+MELLON_PRIVATE_KEY_PASSWORD
+---------------------------
+
+Password for the private key if needed, default is None
+
+MELLON_NAME_ID_FORMATS
+----------------------
+
+NameID formats to advertise in the metadata file, default is ().
+
+MELLON_NAME_ID_POLICY_FORMAT
+----------------------------
+
+The NameID format to request, default is None.
+
+MELLON_FORCE_AUTHN
+------------------
+
+Whether to force authentication on each authencation request,
+default is False.
+
+MELLON_ADAPTER
+--------------
+
+A list of class providings methods handling SAML authorization, user
+lookup and provisioning. Optional methods on theses classes are
+
+ - authorize(idp, saml_attributes) -> boolean
+
+   If any adapter returns False, the authentication is refused. It's
+   possible to raise PermissionDenied to show a specific message on
+   the login interface.
+
+ - lookup_user(idp, saml_attributes) -> User / None
+
+   Each adapter is called in the order of the settings, the first
+   return value which is not None is kept as the authenticated user.
+
+ - provision(user, idp, saml_attributes -> None
+
+   This method is there to fill an existing user fields with data
+   from the SAML attributes or to provision any kind of object in the
+   application.
+
+Settings of the default adapter
+===============================
+
+The following settings are used by the default adapter
+`mellon.adapters.DefaulAdapter` if you use your own adapter you can
+ignore them. If your adapter inherit from the default adapter those
+settings can still be applicable.
+
+MELLON_REALM
+------------
+
+The default realm to associate to user created with the default
+adapter, default is 'saml'.
+
+MELLON_PROVISION
+----------------
+
+Whether to create user if their username does not already exists,
+default is True.
+
+MELLON_USERNAME_TEMPLATE
+------------------------
+
+The template to build and/or retrieve a user from its username based
+on received attributes, the syntax is the one from the str.format()
+method of Python. Available variables are:
+
+ - realm
+ - idp (current setting for the idp issuing the assertion)
+ - attributes
+
+The default value is `{attributes{name_id_content]}@realm`.
+
+Another example could be `{atttributes[uid][0]}` to set the passed
+username as the username of the newly created user.
+
+MELLON_ATTRIBUTE_MAPPING
+------------------------
+
+Maps templates based on SAML attributes to field of the user model.
+Default is {}. To copy standard LDAP attributes into your Django user
+model could for example do that::
+
+    MELLON_ATTRIBUTE_MAPPING = {
+        'email': '{attributes[mail][0]',
+        'first_name': '{attributes[gn][0]}',
+        'last_name': '{attributes[sn][0]}',
+    }
+
+MELLON_SUPERUSER_MAPPING
+------------------------
+
+Attributes superuser flags to user if a SAML attribute contains a given value,
+default is {}. Ex.::
+
+    MELLON_SUPERUSER_MAPPING = {
+        'roles': 'Admin',
+    }
+
+MELLON_AUTHN_CLASSREF
+---------------------
+
+Authorized authentication class references, default is (). Empty
+value means everything is authorized. Authentication class reference
+must be obtained from your identity provider but SHOULD come from the
+SAML 2.0 specification.
+
+MELLON_GROUP_ATTRIBUTE
+----------------------
+
+Name of the SAML attribute to map to Django group names, default is None. Ex.:
+
+   MELLON_GROUP_ATTRIBUTE = 'role'
+
+MELLON_CREATE_GROUP
+-------------------
+
+Whether to create group or only assign existing groups, default is True.

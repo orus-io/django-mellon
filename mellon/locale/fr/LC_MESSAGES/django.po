@@ -1,0 +1,13 @@
+#: templates/mellon/inactive_user.html:6
+#, python-format
+msgid ""
+"Your user, %(user)s, \n"
+"  is inactive please contact your administrator.\n"
+"  "
+msgstr ""
+"L'utilisateur « %(user)s est inactif, veuillez "
+"contacter votre administrateur."
+
+#: templates/mellon/user_not_found.html:6
+msgid "No user found for NameID %(name_id)s"
+msgstr "Aucun utilisateur trouvé pour l'identifiant SAML %(name_id)s"
