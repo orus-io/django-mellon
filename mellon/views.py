@@ -173,18 +173,22 @@ class LogoutView(View):
         referer = request.META.get('HTTP_REFERER')
         if not referer or same_origin(referer, request.build_absolute_uri()):
             if request.user.is_authenticated():
-                issuer = request.session.get('mellon_session', {}).get('issuer')
-                if issuer:
-                    logout = utils.create_logout(request)
-                    try:
-                        logout.initRequest(issuer, lasso.HTTP_METHOD_REDIRECT)
-                        logout.msgRelayState = next_url
-                        logout.buildRequestMsg()
-                    except lasso.Error, e:
-                        log.error('unable to initiate a logout request %r', e)
-                    else:
-                        return HttpResponseRedirect(logout.msgUrl)
-            auth.logout(request)
+                try:
+                    issuer = request.session.get('mellon_session', {}).get('issuer')
+                    if issuer:
+                        logout = utils.create_logout(request)
+                        try:
+                            logout.initRequest(issuer, lasso.HTTP_METHOD_REDIRECT)
+                            logout.msgRelayState = next_url
+                            logout.buildRequestMsg()
+                        except lasso.Error, e:
+                            log.error('unable to initiate a logout request %r', e)
+                        else:
+                            log.debug('sending LogoutRequest %r', logout.request.dump())
+                            log.debug('to URL %r', logout.msgUrl)
+                            return HttpResponseRedirect(logout.msgUrl)
+                finally:
+                   auth.logout(request)
         else:
             log.warning('logout refused referer %r is not of the '
                     'same origin', referer)
