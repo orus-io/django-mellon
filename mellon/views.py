@@ -39,8 +39,7 @@ class LoginView(View):
             while a.statusCode:
                 status_codes.append(a.statusCode.value)
                 a = a.statusCode
-            log.warning('SAML authentication failed, codes: %r',
-                    status_codes)
+            log.warning('SAML authentication failed, codes: %r', status_codes)
             if status.statusMessage:
                 log.warning('SAML authentication failed, message: %r',
                         status.statusMessage)
