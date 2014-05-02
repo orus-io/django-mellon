@@ -5,7 +5,7 @@ from django.http import HttpResponseBadRequest, HttpResponseRedirect, HttpRespon
 from django.contrib import auth
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, resolve_url
 from django.utils.http import same_origin
 
 import lasso
@@ -44,11 +44,13 @@ class LoginView(View):
             if status.statusMessage:
                 log.warning('SAML authentication failed, message: %r',
                         status.statusMessage)
+            next_url = login.msgRelayState or \
+                    resolve_url(settings.LOGIN_REDIRECT_URL)
             return render(request, 'mellon/authentication_failed.html', {
                       'status_message': status.statusMessage,
                       'status_codes': status_codes,
                       'issuer': login.remoteProviderId,
-                      'next_url': login.msgRelayState or settings.LOGIN_REDIRECT_URL,
+                      'next_url': next_url,
                     })
         except lasso.Error, e:
             return HttpResponseBadRequest('error processing the authentication '
@@ -98,7 +100,7 @@ class LoginView(View):
         else:
             return render(request, 'mellon/user_not_found.html', {
                 'saml_attributes': attributes })
-        next_url = login.msgRelayState or settings.LOGIN_REDIRECT_URL
+        next_url = login.msgRelayState or resolve_url(settings.LOGIN_REDIRECT_URL)
         return HttpResponseRedirect(next_url)
 
     def get(self, request, *args, **kwargs):
@@ -171,7 +173,8 @@ class LogoutView(View):
 
     def sp_logout_request(self, request):
         '''Launch a logout request to the identity provider'''
-        next_url = request.GET.get('next') or settings.LOGIN_REDIRECT_URL
+        next_url = resolve_url(settings.LOGIN_REDIRECT_URL)
+        next_url = request.GET.get('next') or next_url
         referer = request.META.get('HTTP_REFERER')
         if not referer or same_origin(referer, request.build_absolute_uri()):
             if request.user.is_authenticated():
@@ -198,18 +201,17 @@ class LogoutView(View):
 
     def sp_logout_response(self, request):
         '''Launch a logout request to the identity provider'''
+        next_url = resolve_url(settings.LOGIN_REDIRECT_URL)
         if 'SAMLResponse' not in request.GET:
-            return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
+            return HttpResponseRedirect(next_url)
         logout = utils.create_logout(request)
         try:
             logout.processResponseMsg(request.META['QUERY_STRING'])
         except lasso.Error, e:
             log.error('unable to process a logout response %r', e)
-            return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
-        next_url = logout.msgRelayState
-        if next_url and same_origin(next_url, request.build_absolute_uri()):
-            return redirect(next_url)
-        return redirect(settings.LOGIN_REDIRECT_URL)
+        if logout.msgRelayState and same_origin(logout.msgRelayState, request.build_absolute_uri()):
+            return redirect(logout.msgRelayState)
+        return redirect(next_url)
 
 
 logout = LogoutView.as_view()
