@@ -84,9 +84,11 @@ setup(name="django-mellon",
       author_email="info@entrouvert.org",
       include_package_data=True,
       packages=find_packages(),
-      install_requires=[],
-      setup_requires=[
+      install_requires=[
           'django>=1.6',
+      ],
+      setup_requires=[
+          'django',
       ],
       tests_require=[
           'nose>=0.11.4',
