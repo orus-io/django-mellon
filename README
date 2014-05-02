@@ -33,6 +33,7 @@ Add mellon urls to your urls::
 If SAML 2.0 should be your only authentication method you can define `mellon_login` as you main `LOGIN_URL`::
 
     LOGIN_URL = 'mellon_login'
+    LOGOUT_URL = 'mellon_logout'
 
 Yout metadata will be downloadable through HTTP on 
 

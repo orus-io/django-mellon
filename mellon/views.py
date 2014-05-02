@@ -5,7 +5,8 @@ from django.http import HttpResponseBadRequest, HttpResponseRedirect, HttpRespon
 from django.contrib import auth
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.utils.http import same_origin
 
 import lasso
 
@@ -120,9 +121,75 @@ class LoginView(View):
 login = csrf_exempt(LoginView.as_view())
 
 class LogoutView(View):
-    pass
+    def get(self, request):
+        if 'SAMLRequest' in request.GET:
+            return self.idp_logout(request)
+        elif 'SAMLResponse' in request.GET:
+            return self.sp_logout_response(request)
+        else:
+            return self.sp_logout_request(request)
+
+    def idp_logout(self, request):
+        '''Handle logout request emitted by the IdP'''
+        logout = utils.create_logout(request)
+        try:
+            logout.processRequestMsg(request.META['QUERY_STRING'])
+        except lasso.Error, e:
+            return HttpResponseBadRequest('error processing logout request: %r' % e)
+        try:
+            logout.validateRequest()
+        except lasso.Error, e:
+            log.warning('error validating logout request: %r' % e)
+        issuer = request.session.get('mellon_session', {}).get('issuer')
+        if issuer == logout.remoteProviderId:
+            auth.logout(request)
+        try:
+            logout.buildResponseMsg()
+        except lasso.Error, e:
+            return HttpResponseBadRequest('error processing logout request: %r' % e)
+        return HttpResponseRedirect(logout.msgUrl)
+
+    def sp_logout_request(self, request):
+        '''Launch a logout request to the identity provider'''
+        next_url = request.GET.get('next') or settings.LOGIN_REDIRECT_URL
+        referer = request.META.get('HTTP_REFERER')
+        if not referer or same_origin(referer, request.build_absolute_uri()):
+            if request.user.is_authenticated():
+                issuer = request.session.get('mellon_session', {}).get('issuer')
+                if issuer:
+                    logout = utils.create_logout(request)
+                    try:
+                        logout.initRequest(issuer, lasso.HTTP_METHOD_REDIRECT)
+                        logout.msgRelayState = next_url
+                        logout.buildRequestMsg()
+                    except lasso.Error, e:
+                        log.error('unable to initiate a logout request %r', e)
+                    else:
+                        return HttpResponseRedirect(logout.msgUrl)
+            auth.logout(request)
+        else:
+            log.warning('logout refused referer %r is not of the '
+                    'same origin', referer)
+        return HttpResponseRedirect(next_url)
+
+    def sp_logout_response(self, request):
+        '''Launch a logout request to the identity provider'''
+        if 'SAMLResponse' not in request.GET:
+            return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
+        logout = utils.create_logout(request)
+        try:
+            logout.processResponseMsg(request.GET['SAMLResponse'])
+        except lasso.Error, e:
+            log.error('unable to process a logout response %r', e)
+            return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
+        next_url = logout.msgRelayState
+        if next_url and same_origin(next_url, request.build_absolute_uri()):
+            return redirect(next_url)
+        return redirect(settings.LOGIN_REDIRECT_URL)
+
 
 logout = LogoutView.as_view()
+
 
 def metadata(request):
     metadata = utils.create_metadata(request)

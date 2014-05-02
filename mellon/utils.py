@@ -111,3 +111,22 @@ def get_values(saml_attributes, name):
 
 def get_parameter(idp, name):
     return idp.get(name) or getattr(app_settings, name)
+
+def create_logout(request):
+    server = create_server(request)
+    mellon_session = request.session.get('mellon_session', {})
+    entity_id = mellon_session.get('issuer')
+    session_index = mellon_session.get('session_index')
+    name_id_format = mellon_session.get('name_id_format')
+    name_id_content = mellon_session.get('name_id_content')
+    session_dump = render_to_string('mellon/session_dump.xml', {
+            'entity_id': entity_id,
+            'session_index': session_index,
+            'name_id_format': name_id_format,
+            'name_id_content': name_id_content,
+    })
+    logout = lasso.Logout(server)
+    if not app_settings.PRIVATE_KEY:
+        logout.setSignatureHint(lasso.PROFILE_SIGNATURE_HINT_FORBID)
+    logout.setSessionFromDump(session_dump)
+    return logout
