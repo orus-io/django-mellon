@@ -119,12 +119,17 @@ def create_logout(request):
     session_index = mellon_session.get('session_index')
     name_id_format = mellon_session.get('name_id_format')
     name_id_content = mellon_session.get('name_id_content')
+    name_id_name_qualifier = mellon_session.get('name_id_name_qualifier')
+    name_id_sp_name_qualifier = mellon_session.get('name_id_sp_name_qualifier')
     session_dump = render_to_string('mellon/session_dump.xml', {
             'entity_id': entity_id,
             'session_index': session_index,
             'name_id_format': name_id_format,
             'name_id_content': name_id_content,
+            'name_id_name_qualifier': name_id_name_qualifier,
+            'name_id_sp_name_qualifier': name_id_sp_name_qualifier,
     })
+    print 'session_dump', session_dump
     logout = lasso.Logout(server)
     if not app_settings.PRIVATE_KEY:
         logout.setSignatureHint(lasso.PROFILE_SIGNATURE_HINT_FORBID)

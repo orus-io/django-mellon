@@ -67,6 +67,8 @@ class LoginView(View):
             'issuer': name_id.nameQualifier or login.remoteProviderId,
             'name_id_content': name_id.content,
             'name_id_format': name_id.format,
+            'name_id_name_qualifier': name_id.nameQualifier,
+            'name_id_sp_name_qualifier': name_id.spNameQualifier,
         })
         authn_statement = login.assertion.authnStatement[0]
         if authn_statement.authnInstant:
