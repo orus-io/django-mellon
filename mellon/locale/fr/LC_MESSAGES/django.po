@@ -1,3 +1,46 @@
+# French translation of django-mellon
+# Copyright (C) 2014 Entr'ouvert
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: django-mellon\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-05-02 13:59+0200\n"
+"PO-Revision-Date: 2014-05-02 13:59+0200\n"
+"Last-Translator: Benjamin Dauvergne <bdauvergne@entrouvert.com>\n"
+"Language-Team: None\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n>1;\n"
+
+#: templates/mellon/authentication_failed.html:7
+msgid "Authentication failed"
+msgstr "Échec de l'authentification"
+
+#: templates/mellon/authentication_failed.html:9
+#, python-format
+msgid ""
+"The authentication has failed, you can return to\n"
+"    the <a href=\"%(next_url)s\">last page</a> you where.\n"
+"    "
+msgstr ""
+"L'authentification a échoué, vous pouvez retourner à <a href=\"%(next_url)s"
+"\">la dernière page</a> atteinte."
+
+#: templates/mellon/authentication_failed.html:14
+msgid "Issuer"
+msgstr "Émetteur"
+
+#: templates/mellon/authentication_failed.html:17
+msgid "Message"
+msgstr "Message"
+
+#: templates/mellon/authentication_failed.html:20
+msgid "Codes"
+msgstr "Codes"
+
 #: templates/mellon/inactive_user.html:6
 #, python-format
 msgid ""
@@ -5,9 +48,10 @@ msgid ""
 "  is inactive please contact your administrator.\n"
 "  "
 msgstr ""
-"L'utilisateur « %(user)s est inactif, veuillez "
-"contacter votre administrateur."
+"L'utilisateur « %(user)s est inactif, veuillez contacter votre "
+"administrateur."
 
 #: templates/mellon/user_not_found.html:6
+#, python-format
 msgid "No user found for NameID %(name_id)s"
 msgstr "Aucun utilisateur trouvé pour l'identifiant SAML %(name_id)s"
