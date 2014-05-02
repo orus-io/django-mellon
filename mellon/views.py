@@ -200,7 +200,7 @@ class LogoutView(View):
             return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
         logout = utils.create_logout(request)
         try:
-            logout.processResponseMsg(request.GET['SAMLResponse'])
+            logout.processResponseMsg(request.META['QUERY_STRING'])
         except lasso.Error, e:
             log.error('unable to process a logout response %r', e)
             return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
