@@ -32,6 +32,24 @@ class LoginView(View):
         try:
             login.processAuthnResponseMsg(request.POST['SAMLResponse'])
             login.acceptSso()
+        except lasso.ProfileStatusNotSuccessError, e:
+            status_codes = []
+            status = login.response.status
+            a = status
+            while a.statusCode:
+                status_codes.append(a.statusCode.value)
+                a = a.statusCode
+            log.warning('SAML authentication failed, codes: %r',
+                    status_codes)
+            if status.statusMessage:
+                log.warning('SAML authentication failed, message: %r',
+                        status.statusMessage)
+            return render(request, 'mellon/authentication_failed.html', {
+                      'status_message': status.statusMessage,
+                      'status_codes': status_codes,
+                      'issuer': login.remoteProviderId,
+                      'next_url': login.msgRelayState or settings.LOGIN_REDIRECT_URL,
+                    })
         except lasso.Error, e:
             return HttpResponseBadRequest('error processing the authentication '
                     'response: %r' % e)

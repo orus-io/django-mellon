@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+
+{% block content %}
+<div id="mellon-authentication-failure" class="mellon-message">
+  <h2>{% trans "Authentication failed" %}</h2>
+  <p>
+    {% blocktrans %}The authentication has failed, you can return to
+    the <a href="{{ next_url }}">last page</a> you where.
+    {% endblocktrans %}
+  </p>
+  <dl id="mellon-authentication-failure-details">
+    <dt>{% trans "Issuer" %}</dt>
+    <dd>{{ issuer }}</dd>
+    {% if status_message %}
+    <dt>{% trans "Message" %}</dt>
+      <dd>{{ status_message }}</dd>
+    {% endif %}
+    <dt>{% trans "Codes" %}</dt>
+    <dd><tt>{{ status_codes|join:", " }}</tt></dd>
+  </dl>
+</div>
+{% endblock %}
