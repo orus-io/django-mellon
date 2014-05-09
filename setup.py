@@ -85,7 +85,7 @@ setup(name="django-mellon",
       include_package_data=True,
       packages=find_packages(),
       install_requires=[
-          'django>=1.6',
+          'django>=1.5',
       ],
       setup_requires=[
           'django',
