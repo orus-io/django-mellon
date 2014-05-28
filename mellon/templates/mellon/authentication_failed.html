@@ -1,24 +1,38 @@
 {% extends "base.html" %}
 {% load i18n %}
 
+{% block extra_scripts %}
+  {% if error_redirect_after_timeout %}
+    <meta http-equiv="refresh" content="{{ error_redirect_after_timeout }};url={{ next_url }}"
+  {% endif %}
+{% endblock
 
 {% block content %}
 <div id="mellon-authentication-failure" class="mellon-message">
-  <h2>{% trans "Authentication failed" %}</h2>
-  <p>
-    {% blocktrans %}The authentication has failed, you can return to
-    the <a href="{{ next_url }}">last page</a> you where.
-    {% endblocktrans %}
+  <h2 class="mellon-message-header">{% trans "Authentication failed" %}</h2>
+  <p class="mellon-message-body">
+    {% blocktrans %}The authentication has failed.{% endblocktrans %}
   </p>
-  <dl id="mellon-authentication-failure-details">
-    <dt>{% trans "Issuer" %}</dt>
-    <dd>{{ issuer }}</dd>
-    {% if status_message %}
-    <dt>{% trans "Message" %}</dt>
-      <dd>{{ status_message }}</dd>
-    {% endif %}
-    <dt>{% trans "Codes" %}</dt>
-    <dd><tt>{{ status_codes|join:", " }}</tt></dd>
-  </dl>
+  <p class="mellon-message-continue">
+    <a class="mellon-link" href="{{ next_url }}">{% trans "Continue" %}</a>
+  </p>
+  {% if debug %}
+    <dl id="mellon-authentication-failure-details">
+      <dt class="mellon-issuer">{% trans "Issuer" %}</dt>
+      <dd class="mellon-issuer"><tt>{{ issuer }}</tt></dd>
+      {% if status_message %}
+        <dt class="mellon-status-message">{% trans "Message" %}</dt>
+        <dd class="mellon-status-message">{{ status_message }}</dd>
+      {% endif %}
+      {% if status_codes %}
+        <dt class="mellon-status-codes">{% trans "Codes" %}</dt>
+        <dd class="mellon-status-codes"><tt>{{ status_codes|join:", " }}</tt></dd>
+      {% endif %}
+      {% if relaystate %}
+        <dt class="mellon-relaystate">{% trans "Relaystate" %}</dt>
+        <dd class="mellon-relaystate"><tt>{{ relaystate }}</tt></dd>
+      {% endif %}
+    </dl>
+  {% endif %}
 </div>
 {% endblock %}

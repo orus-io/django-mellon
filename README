@@ -216,3 +216,16 @@ MELLON_CREATE_GROUP
 -------------------
 
 Whether to create group or only assign existing groups, default is True.
+
+MELLON_ERROR_URL
+================
+
+URL for the continue link when authentication fails, default is
+None. If not ERROR_URL is None, the RelayState is used. If there is
+no RelayState, the LOGIN_REDIRECT_URL, which defaults to /, is used.
+
+MELLON_ERROR_REDIRECT_AFTER_TIMEOUT
+===================================
+
+Timeout in seconds before automatically redirecting the user to the
+continue URL when authentication has failed. Default is 120 seconds.

@@ -7,6 +7,8 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect, resolve_url
 from django.utils.http import same_origin
+from django.utils.translation import ugettext as _
+from django.contrib import messages
 
 import lasso
 
@@ -29,31 +31,55 @@ class LoginView(View):
         if 'SAMLResponse' not in request.POST:
             return self.get(request, *args, **kwargs)
         login = utils.create_login(request)
+        idp_message = None
+        status_codes = []
         try:
             login.processAuthnResponseMsg(request.POST['SAMLResponse'])
             login.acceptSso()
-        except lasso.ProfileStatusNotSuccessError, e:
-            status_codes = []
+        except lasso.ProfileCannotVerifySignatureError:
+            log.warning('SAML authentication failed: signature validation failed for %r',
+                    login.remoteProviderId)
+        except lasso.ParamError:
+            log.exception('lasso param error')
+        except (lasso.ProfileStatusNotSuccessError, lasso.ProfileRequestDeniedError):
             status = login.response.status
             a = status
             while a.statusCode:
                 status_codes.append(a.statusCode.value)
                 a = a.statusCode
-            log.warning('SAML authentication failed, codes: %r', status_codes)
+            args = ['SAML authentication failed: status is not success codes: %r', status_codes]
             if status.statusMessage:
-                log.warning('SAML authentication failed, message: %r',
-                        status.statusMessage)
-            next_url = login.msgRelayState or \
-                    resolve_url(settings.LOGIN_REDIRECT_URL)
-            return render(request, 'mellon/authentication_failed.html', {
-                      'status_message': status.statusMessage,
-                      'status_codes': status_codes,
-                      'issuer': login.remoteProviderId,
-                      'next_url': next_url,
-                    })
+                idp_message = status.statusMessage.decode('utf-8')
+                args[0] += ' message: %r'
+                args.append(status.statusMessage)
+            log.warning(*args)
         except lasso.Error, e:
             return HttpResponseBadRequest('error processing the authentication '
                     'response: %r' % e)
+        else:
+            return self.login_success(request, login)
+        return self.login_failure(request, login, idp_message, status_codes)
+
+    def login_failure(self, request, login, idp_message, status_codes):
+        '''show error message to user after a login failure'''
+        idp = self.get_idp(request)
+        error_url = utils.get_parameter(idp, 'ERROR_URL')
+        error_redirect_after_timeout = utils.get_parameter(idp, 'ERROR_REDIRECT_AFTER_TIMEOUT')
+        if error_url:
+            error_url = resolve_url(error_url)
+        next_url = error_url or login.msgRelayState or resolve_url(settings.LOGIN_REDIRECT_URL)
+        return render(request, 'mellon/authentication_failed.html', {
+                  'debug': settings.DEBUG,
+                  'idp_message': idp_message,
+                  'status_codes': status_codes,
+                  'issuer': login.remoteProviderId,
+                  'next_url': next_url,
+                  'error_url': error_url,
+                  'relaystate': login.msgRelayState,
+                  'error_redirect_after_timeout': error_redirect_after_timeout,
+                })
+
+    def login_success(self, request, login):
         name_id = login.nameIdentifier
         attributes = {}
         attribute_statements = login.assertion.attributeStatement

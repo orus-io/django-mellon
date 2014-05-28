@@ -21,6 +21,8 @@ class AppSettings(object):
             'AUTHN_CLASSREF': (),
             'GROUP_ATTRIBUTE': None,
             'CREATE_GROUP': True,
+            'ERROR_URL': None,
+            'ERROR_REDIRECT_AFTER_TIMEOUT': 120,
     }
 
     @property
