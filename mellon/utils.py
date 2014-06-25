@@ -129,7 +129,6 @@ def create_logout(request):
             'name_id_name_qualifier': name_id_name_qualifier,
             'name_id_sp_name_qualifier': name_id_sp_name_qualifier,
     })
-    print 'session_dump', session_dump
     logout = lasso.Logout(server)
     if not app_settings.PRIVATE_KEY:
         logout.setSignatureHint(lasso.PROFILE_SIGNATURE_HINT_FORBID)
