@@ -4,11 +4,17 @@ from django.core.exceptions import PermissionDenied
 from django.contrib import auth
 from django.contrib.auth.models import Group
 
-from . import utils
+from . import utils, app_settings
 
 log = logging.getLogger(__name__)
 
 class DefaultAdapter(object):
+    def get_idp(self, entity_id):
+        '''Find the first IdP definition matching entity_id'''
+        for idp in app_settings.IDENTITY_PROVIDERS:
+            if entity_id in idp['ENTITY_ID']:
+                return idp
+
     def authorize(self, idp, saml_attributes):
         if not idp:
             return False
