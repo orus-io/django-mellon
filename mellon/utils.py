@@ -60,9 +60,11 @@ def create_login(request):
     return login
 
 def get_idp(entity_id):
-    for idp in app_settings.IDENTITY_PROVIDERS:
-        if idp['ENTITY_ID'] == entity_id:
-            return idp
+    for adapter in get_adapters():
+        if hasattr(adapter, 'get_idp'):
+            idp = adapter.get_idp(entity_id)
+            if idp:
+                return idp
 
 def flatten_datetime(d):
     for key, value in d.iteritems():
