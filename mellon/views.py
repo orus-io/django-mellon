@@ -78,7 +78,6 @@ class LoginView(View):
                 })
 
     def login_success(self, request, login):
-        name_id = login.nameIdentifier
         attributes = {}
         attribute_statements = login.assertion.attributeStatement
         for ats in attribute_statements:
@@ -90,11 +89,15 @@ class LoginView(View):
                     values.append(content.decode('utf8'))
         attributes.update({
             'issuer': name_id.nameQualifier or login.remoteProviderId,
-            'name_id_content': name_id.content,
-            'name_id_format': name_id.format,
-            'name_id_name_qualifier': name_id.nameQualifier,
-            'name_id_sp_name_qualifier': name_id.spNameQualifier,
         })
+        if login.nameIdentifier:
+            name_id = login.nameIdentifier
+            attributes.update({
+                'name_id_content': name_id.content,
+                'name_id_format': name_id.format or lasso.SAML2_NAME_IDENTIFIER_FORMAT_UNSPECIFIED,
+                'name_id_name_qualifier': name_id.nameQualifier,
+                'name_id_sp_name_qualifier': name_id.spNameQualifier,
+            })
         authn_statement = login.assertion.authnStatement[0]
         if authn_statement.authnInstant:
             attributes['authn_instant'] = utils.iso8601_to_datetime(authn_statement.authnInstant)
