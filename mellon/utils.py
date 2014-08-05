@@ -107,7 +107,7 @@ def get_values(saml_attributes, name):
         return (values,)
     return values
 
-def get_parameter(idp, name, default=None):
+def get_setting(idp, name, default=None):
     '''Get a parameter from an IdP specific configuration or from the main
        settings.
     '''

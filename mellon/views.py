@@ -61,8 +61,8 @@ class LoginView(View):
     def login_failure(self, request, login, idp_message, status_codes):
         '''show error message to user after a login failure'''
         idp = self.get_idp(request)
-        error_url = utils.get_parameter(idp, 'ERROR_URL')
-        error_redirect_after_timeout = utils.get_parameter(idp, 'ERROR_REDIRECT_AFTER_TIMEOUT')
+        error_url = utils.get_setting(idp, 'ERROR_URL')
+        error_redirect_after_timeout = utils.get_setting(idp, 'ERROR_REDIRECT_AFTER_TIMEOUT')
         if error_url:
             error_url = resolve_url(error_url)
         next_url = error_url or login.msgRelayState or resolve_url(settings.LOGIN_REDIRECT_URL)

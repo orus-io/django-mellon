@@ -12,7 +12,7 @@ class DefaultAdapter(object):
     def authorize(self, idp, saml_attributes):
         if not idp:
             return False
-        required_classref = utils.get_parameter(idp, 'AUTHN_CLASSREF')
+        required_classref = utils.get_setting(idp, 'AUTHN_CLASSREF')
         if required_classref:
             given_classref = saml_attributes['authn_context_class_ref']
             if given_classref is None or \
@@ -21,8 +21,8 @@ class DefaultAdapter(object):
         return True
 
     def format_username(self, idp, saml_attributes):
-        realm = utils.get_parameter(idp, 'REALM')
-        username_template = utils.get_parameter(idp, 'USERNAME_TEMPLATE')
+        realm = utils.get_setting(idp, 'REALM')
+        username_template = utils.get_setting(idp, 'USERNAME_TEMPLATE')
         try:
             username = username_template.format(
                 realm=realm, attributes=saml_attributes, idp=idp)
@@ -41,7 +41,7 @@ class DefaultAdapter(object):
         username = self.format_username(idp, saml_attributes)
         if not username:
             return None
-        provision = utils.get_parameter(idp, 'PROVISION')
+        provision = utils.get_setting(idp, 'PROVISION')
         if provision:
             user, created = User.objects.get_or_create(username=username)
         else:
@@ -57,8 +57,8 @@ class DefaultAdapter(object):
         self.provision_groups(user, idp, saml_attributes)
 
     def provision_attribute(self, user, idp, saml_attributes):
-        realm = utils.get_parameter(idp, 'REALM')
-        attribute_mapping = utils.get_parameter(idp, 'ATTRIBUTE_MAPPING')
+        realm = utils.get_setting(idp, 'REALM')
+        attribute_mapping = utils.get_setting(idp, 'ATTRIBUTE_MAPPING')
         for field, tpl in attribute_mapping.iteritems():
             try:
                 value = tpl.format(realm=realm, attributes=saml_attributes, idp=idp)
@@ -70,7 +70,7 @@ class DefaultAdapter(object):
                 setattr(user, field, value)
 
     def provision_superuser(self, user, idp, saml_attributes):
-        superuser_mapping = utils.get_parameter(idp, 'SUPERUSER_MAPPING')
+        superuser_mapping = utils.get_setting(idp, 'SUPERUSER_MAPPING')
         if not superuser_mapping:
             return
         for key, values in superuser_mapping.iteritems():
@@ -93,8 +93,8 @@ class DefaultAdapter(object):
                 user.save()
 
     def provision_groups(self, user, idp, saml_attributes):
-        group_attribute = utils.get_parameter(idp, 'GROUP_ATTRIBUTE')
-        create_group = utils.get_parameter(idp, 'CREATE_GROUP')
+        group_attribute = utils.get_setting(idp, 'GROUP_ATTRIBUTE')
+        create_group = utils.get_setting(idp, 'CREATE_GROUP')
         if group_attribute in saml_attributes:
             values = saml_attributes[group_attribute]
             if not isinstance(values, (list, tuple)):
