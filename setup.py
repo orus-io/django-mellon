@@ -21,15 +21,13 @@ class compile_translations(Command):
 
     def run(self):
         import os
-        import sys
-        from django.core.management.commands.compilemessages import \
-            compile_messages
+        from django.core.management import call_command
         for path in ['mellon/']:
             if path.endswith('.py'):
                 continue
             curdir = os.getcwd()
             os.chdir(os.path.realpath(path))
-            compile_messages(sys.stderr)
+            call_command('compilemessages')
             os.chdir(curdir)
 
 class build(_build):
