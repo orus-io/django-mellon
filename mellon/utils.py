@@ -97,7 +97,7 @@ def import_object(path):
 @to_list
 def get_adapters(idp={}):
     idp = idp or {}
-    adapters = idp.get('ADAPTER', []) + app_settings.ADAPTER
+    adapters = tuple(idp.get('ADAPTER', ())) + tuple(app_settings.ADAPTER)
     for adapter in adapters:
         yield import_object(adapter)()
 
