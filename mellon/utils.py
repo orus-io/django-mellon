@@ -113,7 +113,7 @@ def get_setting(idp, name, default=None):
     '''Get a parameter from an IdP specific configuration or from the main
        settings.
     '''
-    return idp.get(name) or getattr(app_settings, name, default=default)
+    return idp.get(name) or getattr(app_settings, name, default)
 
 def create_logout(request):
     server = create_server(request)
