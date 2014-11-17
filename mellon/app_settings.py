@@ -9,6 +9,7 @@ class AppSettings(object):
             'PRIVATE_KEY_PASSWORD': None,
             'NAME_ID_FORMATS': (),
             'NAME_ID_POLICY_FORMAT': None,
+            'NAME_ID_POLICY_ALLOW_CREATE': True,
             'FORCE_AUTHN': False,
             'ADAPTER': (
                 'mellon.adapters.DefaultAdapter',

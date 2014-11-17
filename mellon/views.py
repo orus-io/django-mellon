@@ -145,7 +145,11 @@ class LoginView(View):
             authn_request = login.request
             # configure NameID policy
             policy = authn_request.nameIdPolicy
-            policy_format = idp.get('NAME_ID_POLICY_FORMAT') or app_settings.NAME_ID_POLICY_FORMAT
+            policy.allowCreate = \
+                    (idp.get('NAME_ID_POLICY_ALLOW_CREATE') or \
+                    app_settings.NAME_ID_POLICY_ALLOW_CREATE) and True
+            policy_format = idp.get('NAME_ID_POLICY_FORMAT') \
+                    or app_settings.NAME_ID_POLICY_FORMAT
             policy.format = policy_format or None
             force_authn = idp.get('FORCE_AUTHN') or app_settings.FORCE_AUTHN
             if force_authn:
