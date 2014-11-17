@@ -21,7 +21,8 @@ def create_metadata(request):
         public_keys = []
         for public_key in app_settings.PUBLIC_KEYS:
             if public_key.startswith('/'):
-                public_key = file(public_key).read()
+                # clean PEM file
+                public_key = ''.join(file(public_key).read().splitlines()[1:-1])
             public_keys.append(public_key)
         name_id_formats = app_settings.NAME_ID_FORMATS
         return render_to_string('mellon/metadata.xml', {
