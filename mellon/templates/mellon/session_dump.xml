@@ -4,7 +4,7 @@
                             SessionIndex="{{ session_index }}">
             <ns1:NameID Format="{{ name_id_format }}"
                     {% if name_id_name_qualifier %}NameQualifier="{{ name_id_name_qualifier }}"{% endif %}
-                    {% if name_id_sp_name_qualifier %}SPNameQualiflier="{{ name_id_sp_name_qualifier }}"{% endif %}
+                    {% if name_id_sp_name_qualifier %}SPNameQualifier="{{ name_id_sp_name_qualifier }}"{% endif %}
                     >{{ name_id_content }}</ns1:NameID>
     </ns0:NidAndSessionIndex>
 </ns0:Session>
