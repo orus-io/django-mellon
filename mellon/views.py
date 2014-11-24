@@ -95,10 +95,10 @@ class LoginView(LogMixin, View):
         if login.nameIdentifier:
             name_id = login.nameIdentifier
             attributes.update({
-                'name_id_content': name_id.content,
-                'name_id_format': name_id.format or lasso.SAML2_NAME_IDENTIFIER_FORMAT_UNSPECIFIED,
-                'name_id_name_qualifier': name_id.nameQualifier,
-                'name_id_sp_name_qualifier': name_id.spNameQualifier,
+                'name_id_content': name_id.content.decode('utf8'),
+                'name_id_format': unicode(name_id.format or lasso.SAML2_NAME_IDENTIFIER_FORMAT_UNSPECIFIED),
+                'name_id_name_qualifier': unicode(name_id.nameQualifier),
+                'name_id_sp_name_qualifier': unicode(name_id.spNameQualifier),
             })
             attributes.update({
                 'issuer': name_id.nameQualifier
