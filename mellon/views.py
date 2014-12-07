@@ -97,8 +97,8 @@ class LoginView(LogMixin, View):
             attributes.update({
                 'name_id_content': name_id.content.decode('utf8'),
                 'name_id_format': unicode(name_id.format or lasso.SAML2_NAME_IDENTIFIER_FORMAT_UNSPECIFIED),
-                'name_id_name_qualifier': unicode(name_id.nameQualifier),
-                'name_id_sp_name_qualifier': unicode(name_id.spNameQualifier),
+                'name_id_name_qualifier': unicode(name_id.nameQualifier) if name_id.nameQualifier else unicode(login.server.providerId),
+                'name_id_sp_name_qualifier': unicode(name_id.spNameQualifier) if name_id.spNameQualifier else unicode(login.remoteProviderId),
             })
             attributes.update({
                 'issuer': name_id.nameQualifier
