@@ -92,6 +92,7 @@ class LoginView(LogMixin, View):
                     content = [any.exportToXml() for any in value.any]
                     content = ''.join(content)
                     values.append(content.decode('utf8'))
+        attributes['issuer'] = login.remoteProviderId
         if login.nameIdentifier:
             name_id = login.nameIdentifier
             attributes.update({
@@ -100,11 +101,6 @@ class LoginView(LogMixin, View):
                 'name_id_name_qualifier': unicode(name_id.nameQualifier if name_id.nameQualifier else login.remoteProviderId),
                 'name_id_sp_name_qualifier': unicode(name_id.spNameQualifier if name_id.spNameQualifier else login.server.providerId),
             })
-            attributes.update({
-                'issuer': name_id.nameQualifier
-            })
-        if 'issuer' not in attributes:
-            attributes['issuer'] = login.remoteProviderId
         authn_statement = login.assertion.authnStatement[0]
         if authn_statement.authnInstant:
             attributes['authn_instant'] = utils.iso8601_to_datetime(authn_statement.authnInstant)
