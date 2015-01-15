@@ -1,7 +1,7 @@
-{% extends "base.html" %}
+{% extends "mellon/base.html" %}
 {% load i18n %}
 
-{% block content %}
+{% block mellon_content %}
 <p>
   {% blocktrans with name_id=saml_attributes.name_id_content %}No user found for NameID {{ name_id  }}{% endblocktrans %}
 </p>
