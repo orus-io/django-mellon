@@ -58,6 +58,8 @@ class LoginView(LogMixin, View):
             return HttpResponseBadRequest('error processing the authentication '
                     'response: %r' % e)
         else:
+            if 'RelayState' in request.POST:
+                login.msgRelayState = request.POST['RelayState']
             return self.login_success(request, login)
         return self.login_failure(request, login, idp_message, status_codes)
 
