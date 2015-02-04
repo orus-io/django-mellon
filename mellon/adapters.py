@@ -30,7 +30,7 @@ class DefaultAdapter(object):
         realm = utils.get_setting(idp, 'REALM')
         username_template = utils.get_setting(idp, 'USERNAME_TEMPLATE')
         try:
-            username = username_template.format(
+            username = unicode(username_template).format(
                 realm=realm, attributes=saml_attributes, idp=idp)
         except ValueError:
             log.error('invalid username template %r'. username_template)
@@ -67,7 +67,7 @@ class DefaultAdapter(object):
         attribute_mapping = utils.get_setting(idp, 'ATTRIBUTE_MAPPING')
         for field, tpl in attribute_mapping.iteritems():
             try:
-                value = tpl.format(realm=realm, attributes=saml_attributes, idp=idp)
+                value = unicode(tpl).format(realm=realm, attributes=saml_attributes, idp=idp)
             except ValueError:
                 log.warning('invalid attribute mapping template %r', tpl)
             except (AttributeError, KeyError, IndexError, ValueError), e:
