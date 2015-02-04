@@ -36,7 +36,7 @@ Add mellon urls to your urls::
 
     urlpatterns = patterns('',
         ...
-        url(r'^/accounts/mellon', include('mellon.urls')),
+        url(r'^/accounts/mellon/', include('mellon.urls')),
     )
 
 If SAML 2.0 should be your only authentication method you can define `mellon_login` as you main `LOGIN_URL`::
