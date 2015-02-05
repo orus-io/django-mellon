@@ -131,6 +131,7 @@ class LoginView(LogMixin, View):
         else:
             return render(request, 'mellon/user_not_found.html', {
                 'saml_attributes': attributes })
+        request.session['lasso_session_dump'] = login.session.dump()
         next_url = login.msgRelayState or resolve_url(settings.LOGIN_REDIRECT_URL)
         return HttpResponseRedirect(next_url)
 
@@ -220,6 +221,12 @@ class LogoutView(LogMixin, View):
                     if issuer:
                         logout = utils.create_logout(request)
                         try:
+                            if request.session.has_key('lasso_session_dump'):
+                                logout.setSessionFromDump(
+                                        request.session['lasso_session_dump']
+                                        )
+                            else:
+                                self.log.error('unable to find lasso session dump')
                             logout.initRequest(issuer, lasso.HTTP_METHOD_REDIRECT)
                             logout.msgRelayState = next_url
                             logout.buildRequestMsg()
