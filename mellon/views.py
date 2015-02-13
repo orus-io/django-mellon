@@ -10,7 +10,7 @@ from django.utils.http import same_origin
 
 import lasso
 
-from . import app_settings, utils
+from . import utils
 
 
 class LogMixin(object):
@@ -23,11 +23,9 @@ class LoginView(LogMixin, View):
     def get_idp(self, request):
         entity_id = request.REQUEST.get('entity_id')
         if not entity_id:
-            return app_settings.IDENTITY_PROVIDERS[0]
+            return next(utils.get_idps())
         else:
-            for idp in app_settings.IDENTITY_PROVIDERS:
-                if idp.entity_id == entity_id:
-                    return idp
+            return utils.get_idp(entity_id)
 
     def post(self, request, *args, **kwargs):
         '''Assertion consumer'''
@@ -149,19 +147,15 @@ class LoginView(LogMixin, View):
             authn_request = login.request
             # configure NameID policy
             policy = authn_request.nameIdPolicy
-            policy.allowCreate = \
-                    (idp.get('NAME_ID_POLICY_ALLOW_CREATE') or \
-                    app_settings.NAME_ID_POLICY_ALLOW_CREATE) and True
-            policy_format = idp.get('NAME_ID_POLICY_FORMAT') \
-                    or app_settings.NAME_ID_POLICY_FORMAT
-            policy.format = policy_format or None
-            force_authn = idp.get('FORCE_AUTHN') or app_settings.FORCE_AUTHN
+            policy.allowCreate = utils.get_setting(idp, 'NAME_ID_POLICY_ALLOW_CREATE')
+            policy.format = utils.get_setting(idp, 'NAME_ID_POLICY_FORMAT')
+            force_authn = utils.get_setting(idp, 'FORCE_AUTHN')
             if force_authn:
                 policy.forceAuthn = True
             if request.GET.get('passive') == '1':
                 policy.isPassive = True
             # configure requested AuthnClassRef
-            authn_classref = idp.get('AUTHN_CLASSREF') or app_settings.AUTHN_CLASSREF
+            authn_classref = utils.get_setting(idp, 'AUTHN_CLASSREF')
             if authn_classref:
                 req_authncontext = lasso.RequestedAuthnContext()
                 authn_request.requestedAuthnContext = req_authncontext

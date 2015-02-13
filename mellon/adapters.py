@@ -15,6 +15,9 @@ class DefaultAdapter(object):
             if entity_id in idp['ENTITY_ID']:
                 return idp
 
+    def get_idps(self):
+        return [idp for idp in app_settings.IDENTITY_PROVIDERS]
+
     def authorize(self, idp, saml_attributes):
         if not idp:
             return False

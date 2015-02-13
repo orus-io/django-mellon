@@ -39,7 +39,7 @@ SERVERS = {}
 def create_server(request):
     root = request.build_absolute_uri('/')
     if root not in SERVERS:
-        idps = app_settings.IDENTITY_PROVIDERS
+        idps = get_idps()
         metadata = create_metadata(request)
         server = lasso.Server.newFromBuffers(metadata,
                 private_key_content=app_settings.PRIVATE_KEY,
@@ -66,6 +66,12 @@ def get_idp(entity_id):
             idp = adapter.get_idp(entity_id)
             if idp:
                 return idp
+
+def get_idps():
+    for adapter in get_adapters():
+        if hasattr(adapter, 'get_idps'):
+            for idp in adapter.get_idps():
+                yield idp
 
 def flatten_datetime(d):
     for key, value in d.iteritems():
