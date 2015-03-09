@@ -3,6 +3,8 @@
 ''' Setup script for mellon
 '''
 
+import os
+import subprocess
 from setuptools import setup, find_packages
 from setuptools.command.install_lib import install_lib as _install_lib
 from distutils.command.build import build as _build
@@ -42,35 +44,23 @@ class install_lib(_install_lib):
         _install_lib.run(self)
 
 def get_version():
-    import glob
-    import re
-    import os
-
-    version = None
-    for d in glob.glob('*'):
-        if not os.path.isdir(d):
-            continue
-        module_file = os.path.join(d, '__init__.py')
-        if not os.path.exists(module_file):
-            continue
-        for v in re.findall("""__version__ *= *['"](.*)['"]""",
-                open(module_file).read()):
-            assert version is None
-            version = v
-        if version:
-            break
-    assert version is not None
+    '''Use the VERSION, if absent generates a version with git describe, if not
+       tag exists, take 0.0.0- and add the length of the commit log.
+    '''
+    if os.path.exists('VERSION'):
+        with open('VERSION', 'r') as v:
+            return v.read()
     if os.path.exists('.git'):
-        import subprocess
         p = subprocess.Popen(['git','describe','--dirty','--match=v*'],
-                stdout=subprocess.PIPE)
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         result = p.communicate()[0]
-        assert p.returncode == 0, 'git returned non-zero'
-        new_version = result.split()[0][1:]
-        assert new_version.split('-')[0] == version, '__version__ must match the last git annotated tag'
-        version = new_version.replace('-', '.')
-    return version
-
+        if p.returncode == 0:
+            return result.split()[0][1:].replace('-', '.')
+        else:
+            return '0.0.0-%s' % len(
+                    subprocess.check_output(
+                            ['git', 'rev-list', 'HEAD']).splitlines())
+    return '0.0.0'
 
 setup(name="django-mellon",
       version=get_version(),

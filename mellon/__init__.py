@@ -1,4 +1,3 @@
-__version__ = '1.2.11'
 try:
     import lasso
 except ImportError:
