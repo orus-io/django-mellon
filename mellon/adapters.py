@@ -68,6 +68,7 @@ class DefaultAdapter(object):
     def provision_attribute(self, user, idp, saml_attributes):
         realm = utils.get_setting(idp, 'REALM')
         attribute_mapping = utils.get_setting(idp, 'ATTRIBUTE_MAPPING')
+        attribute_set = False
         for field, tpl in attribute_mapping.iteritems():
             try:
                 value = unicode(tpl).format(realm=realm, attributes=saml_attributes, idp=idp)
@@ -76,7 +77,10 @@ class DefaultAdapter(object):
             except (AttributeError, KeyError, IndexError, ValueError), e:
                 log.warning('invalid reference in attribute mapping template %r: %s', tpl, e)
             else:
+                attribute_set = True
                 setattr(user, field, value)
+        if attribute_set:
+            user.save()
 
     def provision_superuser(self, user, idp, saml_attributes):
         superuser_mapping = utils.get_setting(idp, 'SUPERUSER_MAPPING')
