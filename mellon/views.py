@@ -12,7 +12,6 @@ import lasso
 
 from . import utils
 
-
 class LogMixin(object):
     """Initialize a module logger in new objects"""
     def __init__(self, *args, **kwargs):
@@ -60,10 +59,10 @@ class LoginView(LogMixin, View):
         else:
             if 'RelayState' in request.POST:
                 login.msgRelayState = request.POST['RelayState']
-            return self.login_success(request, login)
-        return self.login_failure(request, login, idp_message, status_codes)
+            return self.sso_success(request, login)
+        return self.sso_failure(request, login, idp_message, status_codes)
 
-    def login_failure(self, request, login, idp_message, status_codes):
+    def sso_failure(self, request, login, idp_message, status_codes):
         '''show error message to user after a login failure'''
         idp = self.get_idp(request)
         error_url = utils.get_setting(idp, 'ERROR_URL')
@@ -82,7 +81,7 @@ class LoginView(LogMixin, View):
                   'error_redirect_after_timeout': error_redirect_after_timeout,
                 })
 
-    def login_success(self, request, login):
+    def sso_success(self, request, login):
         attributes = {}
         attribute_statements = login.assertion.attributeStatement
         for ats in attribute_statements:
@@ -115,6 +114,9 @@ class LoginView(LogMixin, View):
                 attributes['authn_context_class_ref'] = \
                     authn_context.authnContextClassRef
         self.log.debug('trying to authenticate with attributes %r', attributes)
+        return self.authenticate(request, login, attributes)
+
+    def authenticate(self, request, login, attributes):
         user = auth.authenticate(saml_attributes=attributes)
         if user is not None:
             if user.is_active:
