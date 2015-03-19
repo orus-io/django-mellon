@@ -100,13 +100,24 @@ doing key roll-over
 MELLON_PRIVATE_KEY
 ------------------
 
-The PKCS#8 PEM encoded private key, if not provided request will not
-be signed.
+The PKCS#8 PEM encoded private key. If neither MELLON_PRIVATE_KEYS and
+MELLON_PRIVATE_KEY are set, request will not be signed.
 
 MELLON_PRIVATE_KEY_PASSWORD
 ---------------------------
 
 Password for the private key if needed, default is None
+
+MELLON_PRIVATE_KEYS
+-------------------
+
+A list of private keys contained in strings (same format ass
+MELLON_PRIVATE_KEY) or of tuple paris (private_key, private_key_password). If
+MELLON_PRIVATE_KEY is None, the first key in MELLON_PRIVATE_KEYS will be used
+to sign messages. Other keys are only for decrypting encrypted assertions.  If
+the same key appear in MELLON_PRIVATE_KEY and MELLON_PRIVATE_KEYS it will be
+ignored the second time. If neither MELLON_PRIVATE_KEYS and MELLON_PRIVATE_KEY
+are set, request will not be signed.
 
 MELLON_NAME_ID_FORMATS
 ----------------------

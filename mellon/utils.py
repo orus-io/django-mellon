@@ -42,9 +42,28 @@ def create_server(request):
     if root not in SERVERS:
         idps = get_idps()
         metadata = create_metadata(request)
+        if app_settings.PRIVATE_KEY:
+            private_key = app_settings.PRIVATE_KEY
+            private_key_password = app_settings.PRIVATE_KEY_PASSWORD
+        elif app_settings.PRIVATE_KEYS:
+            private_key = app_settings.PRIVATE_KEYS
+            private_key_password = None
+            if isinstance(private_key, (tuple, list)):
+                private_key_password = private_key[1]
+                private_key = private_key[0]
+        else: # no signature
+            private_key = None
+            private_key_password = None
         server = lasso.Server.newFromBuffers(metadata,
-                private_key_content=app_settings.PRIVATE_KEY,
-                private_key_password=app_settings.PRIVATE_KEY_PASSWORD)
+                private_key_content=private_key,
+                private_key_password=private_key_password)
+        server.setEncryptionPrivateKeyWithPassword(private_key, private_key_password)
+        for key in app_settings.PRIVATE_KEYS:
+            password = None
+            if isinstance(key, (tuple, list)):
+                password = key[1]
+                key = key[0]
+            server.setEncryptionPrivateKeyWithPassword(key, password)
         for idp in idps:
             if 'METADATA_URL' in idp and 'METADATA' not in idp:
                 idp['METADATA'] = urllib.urlopen(idp['METADATA_URL']).read()
@@ -59,7 +78,7 @@ def create_server(request):
 def create_login(request):
     server = create_server(request)
     login = lasso.Login(server)
-    if not app_settings.PRIVATE_KEY:
+    if not app_settings.PRIVATE_KEY and not app_settings.PRIVATE_KEYS:
         login.setSignatureHint(lasso.PROFILE_SIGNATURE_HINT_FORBID)
     return login
 

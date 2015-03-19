@@ -6,6 +6,7 @@ class AppSettings(object):
     __DEFAULTS = {
             'PUBLIC_KEYS': (),
             'PRIVATE_KEY': None,
+            'PRIVATE_KEYS': (),
             'PRIVATE_KEY_PASSWORD': None,
             'NAME_ID_FORMATS': (),
             'NAME_ID_POLICY_FORMAT': None,
