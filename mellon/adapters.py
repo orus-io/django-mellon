@@ -4,7 +4,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib import auth
 from django.contrib.auth.models import Group
 
-from . import utils, app_settings
+from . import utils, app_settings, models
 
 log = logging.getLogger(__name__)
 
@@ -47,23 +47,32 @@ class DefaultAdapter(object):
 
     def lookup_user(self, idp, saml_attributes):
         User = auth.get_user_model()
-        username = self.format_username(idp, saml_attributes)
-        if not username:
-            return None
-        provision = utils.get_setting(idp, 'PROVISION')
-        if provision:
-            user, created = User.objects.get_or_create(username=username)
-        else:
-            try:
-                user = User.objects.get(username=username)
-            except User.DoesNotExist:
-                return
+        name_id = saml_attributes['name_id_content']
+        issuer = saml_attributes['issuer']
+        try:
+            return User.objects.get(saml_identifiers__name_id=name_id,
+                    saml_identifiers__issuer=issuer)
+        except User.DoesNotExist:
+            if not utils.get_setting(idp, 'PROVISION'):
+                return None
+            username = self.format_username(idp, saml_attributes)
+            if not username:
+                return None
+            user = User(username=username)
+            user.save()
+            self.provision_name_id(user, idp, saml_attributes)
         return user
 
     def provision(self, user, idp, saml_attributes):
         self.provision_attribute(user, idp, saml_attributes)
         self.provision_superuser(user, idp, saml_attributes)
         self.provision_groups(user, idp, saml_attributes)
+
+    def provision_name_id(self, user, idp, saml_attributes):
+        models.UserSAMLIdentifier.objects.get_or_create(
+                user=user,
+                issuer=saml_attributes['issuer'],
+                name_id=saml_attributes['name_id_content'])
 
     def provision_attribute(self, user, idp, saml_attributes):
         realm = utils.get_setting(idp, 'REALM')
