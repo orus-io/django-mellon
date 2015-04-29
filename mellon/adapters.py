@@ -34,7 +34,7 @@ class DefaultAdapter(object):
         username_template = utils.get_setting(idp, 'USERNAME_TEMPLATE')
         try:
             username = unicode(username_template).format(
-                realm=realm, attributes=saml_attributes, idp=idp)
+                realm=realm, attributes=saml_attributes, idp=idp)[:30]
         except ValueError:
             log.error('invalid username template %r'. username_template)
         except (AttributeError, KeyError, IndexError), e:
