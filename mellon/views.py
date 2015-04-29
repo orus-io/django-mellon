@@ -155,9 +155,9 @@ class LoginView(LogMixin, View):
             policy.format = utils.get_setting(idp, 'NAME_ID_POLICY_FORMAT')
             force_authn = utils.get_setting(idp, 'FORCE_AUTHN')
             if force_authn:
-                policy.forceAuthn = True
+                authn_request.forceAuthn = True
             if request.GET.get('passive') == '1':
-                policy.isPassive = True
+                authn_request.isPassive = True
             # configure requested AuthnClassRef
             authn_classref = utils.get_setting(idp, 'AUTHN_CLASSREF')
             if authn_classref:
