@@ -249,3 +249,11 @@ MELLON_ERROR_REDIRECT_AFTER_TIMEOUT
 
 Timeout in seconds before automatically redirecting the user to the
 continue URL when authentication has failed. Default is 120 seconds.
+
+
+Tests
+=====
+
+Unit tests are written using pytest, and can be run with:
+
+   DJANGO_SETTINGS_MODULE=testsettings py.test
