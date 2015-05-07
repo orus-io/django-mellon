@@ -21,9 +21,9 @@ saml_attributes = {
 def test_format_username(settings):
     adapter = DefaultAdapter()
     assert adapter.format_username(idp, {}) == None
-    assert adapter.format_username(idp, saml_attributes) == 'x'*32 + '@saml'
+    assert adapter.format_username(idp, saml_attributes) == ('x'*32 + '@saml')[:30]
     settings.MELLON_USERNAME_TEMPLATE = '{attributes[name_id_content]}'
-    assert adapter.format_username(idp, saml_attributes) == 'x'*32
+    assert adapter.format_username(idp, saml_attributes) == ('x'*32)[:30]
     settings.MELLON_USERNAME_TEMPLATE = '{attributes[username][0]}'
     assert adapter.format_username(idp, saml_attributes) == 'foobar'
 
