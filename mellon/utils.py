@@ -88,6 +88,7 @@ def get_idp(entity_id):
             idp = adapter.get_idp(entity_id)
             if idp:
                 return idp
+    return {}
 
 def get_idps():
     for adapter in get_adapters():
