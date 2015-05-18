@@ -77,6 +77,7 @@ setup(name="django-mellon",
       ],
       setup_requires=[
           'django',
+          'requests',
       ],
       tests_require=[
           'nose>=0.11.4',

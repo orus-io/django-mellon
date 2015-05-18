@@ -1,4 +1,5 @@
 import logging
+import requests
 
 from django.views.generic import View
 from django.http import HttpResponseBadRequest, HttpResponseRedirect, HttpResponse
@@ -137,8 +138,54 @@ class LoginView(LogMixin, View):
         next_url = login.msgRelayState or resolve_url(settings.LOGIN_REDIRECT_URL)
         return HttpResponseRedirect(next_url)
 
+    def continue_sso_artifact_get(self, request):
+        login = utils.create_login(request)
+        login.initRequest(request.META['QUERY_STRING'], lasso.HTTP_METHOD_ARTIFACT_GET)
+        login.buildRequestMsg()
+
+        idp_message = None
+        status_codes = []
+
+        result = requests.post(login.msgUrl, data=login.msgBody,
+                headers={'content-type': 'text/xml'})
+        if result.status_code != 200:
+            self.log.warning('SAML authentication failed: '\
+                             'IdP returned %s when given artifact' % result.status_code)
+            return self.sso_failure(request, login, idp_message, status_codes)
+
+        try:
+            login.processResponseMsg(result.text)
+            login.acceptSso()
+        except lasso.ProfileCannotVerifySignatureError:
+            self.log.warning('SAML authentication failed: signature validation failed for %r',
+                    login.remoteProviderId)
+        except lasso.ParamError:
+            self.log.exception('lasso param error')
+        except (lasso.ProfileStatusNotSuccessError, lasso.ProfileRequestDeniedError):
+            status = login.response.status
+            a = status
+            while a.statusCode:
+                status_codes.append(a.statusCode.value)
+                a = a.statusCode
+            args = ['SAML authentication failed: status is not success codes: %r', status_codes]
+            if status.statusMessage:
+                idp_message = status.statusMessage.decode('utf-8')
+                args[0] += ' message: %r'
+                args.append(status.statusMessage)
+            self.log.warning(*args)
+        except lasso.Error, e:
+            return HttpResponseBadRequest('error processing the authentication '
+                    'response: %r' % e)
+        else:
+            if 'RelayState' in request.GET:
+                login.msgRelayState = request.GET['RelayState']
+            return self.sso_success(request, login)
+        return self.sso_failure(request, login, idp_message, status_codes)
+
     def get(self, request, *args, **kwargs):
         '''Initialize login request'''
+        if 'SAMLart' in request.GET:
+            return self.continue_sso_artifact_get(request)
         next_url = request.GET.get('next')
         idp = self.get_idp(request)
         if idp is None:
