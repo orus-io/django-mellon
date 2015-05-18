@@ -12,7 +12,7 @@ class DefaultAdapter(object):
     def get_idp(self, entity_id):
         '''Find the first IdP definition matching entity_id'''
         for idp in app_settings.IDENTITY_PROVIDERS:
-            if entity_id in idp['ENTITY_ID']:
+            if entity_id == idp['ENTITY_ID']:
                 return idp
 
     def get_idps(self):
