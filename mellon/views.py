@@ -64,7 +64,7 @@ class LoginView(LogMixin, View):
 
     def sso_failure(self, request, login, idp_message, status_codes):
         '''show error message to user after a login failure'''
-        idp = self.get_idp(request)
+        idp = utils.get_idp(login.remoteProviderId)
         error_url = utils.get_setting(idp, 'ERROR_URL')
         error_redirect_after_timeout = utils.get_setting(idp, 'ERROR_REDIRECT_AFTER_TIMEOUT')
         if error_url:
