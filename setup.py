@@ -74,10 +74,10 @@ setup(name="django-mellon",
       packages=find_packages(),
       install_requires=[
           'django>=1.5',
+          'requests',
       ],
       setup_requires=[
           'django',
-          'requests',
       ],
       tests_require=[
           'nose>=0.11.4',
