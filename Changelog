@@ -1,0 +1,65 @@
+1.2.15
+------
+
+- add a Changelog
+- app_settings,views: make the default assertion consumer binding customizable
+  (#7406)
+- setup.py,MANIFEST.in: include the VERSION file in distribution
+- setup.py: requests is an install_requires not a setup_requires
+- templates: make HTTP-Artifact the default binding for SSO
+- add support for artifact GET protocol binding (#7267)
+- adapters: fix DefaultAdapter.get_idp(), idp['ENTITY_ID'] is a string not a list
+- Revert "templates: make HTTP-Artifact the default binding for SSO"
+- views: in sso_failure() the call to self.get_id() could never work, replace
+  by utils.get_idp()
+- utils: add a default return value to utils.get_idp()
+- templates: make HTTP-Artifact the default binding for SSO
+- views: fix setting of isPassive and forceAuthn (fixes #7100)
+- tests: adapt to usernames cut at 30 characters
+- Limit username to 30 characters for now (#7085)
+- tests: initial adapter tests
+- doc: fix title level for some configuration variables
+- add a model to store user<->NameID mapping (#7085)
+- Prepare for adding tests
+- Support encryption
+- login view refactored (#6801)
+
+1.2.14
+------
+
+- Fix include of base.html in mellon/base.html
+
+1.2.13
+------
+
+- Add missing mellon/base.html
+- save provisioned users (#6667)
+
+1.2.12
+------
+
+- Set version only from git tags
+- set login.msgRelayState to the value from POST (#6384)
+- Allow getting metadata of IdP by doing an HTTP GET
+- Always use adapters to get to IdP settings
+
+1.2.11
+------
+
+- mellon/views.py: store and load the liberty session dump for slo
+- adapters: force template string to be unicode as attributes are values
+- README: fix patterns when including urls
+- urls: fix error in pattern, includable patterns must not start with a
+
+1.2.10
+------
+
+- Add a mellon/base.html template to make an indirection between mellon
+  templates and the project base.html template (#6301)
+
+1.2.9
+-----
+
+- bug fixed on Lasso session data generation
+- AuthnRequest now contain the AllowCreate flag
+

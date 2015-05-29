@@ -3,15 +3,6 @@ django-mellon
 
 SAML 2.0 authentication for Django
 
-NEWS
-====
-
-1.2.9
------
-
-- bug fixed on Lasso session data generation
-- AuthnRequest now contain the AllowCreate flag
-
 Usage
 =====
 
