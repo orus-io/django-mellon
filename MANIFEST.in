@@ -1,3 +1,4 @@
 recursive-include mellon/templates *.html *.xml
 recursive-include mellon/locale *.po *.mo
 include MANIFEST.in
+include VERSION

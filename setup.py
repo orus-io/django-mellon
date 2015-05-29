@@ -35,8 +35,21 @@ class compile_translations(Command):
 class build(_build):
     sub_commands = [('compile_translations', None)] + _build.sub_commands
 
-class sdist(_sdist):
-    sub_commands = [('compile_translations', None)] + _sdist.sub_commands
+class eo_sdist(_sdist):
+    sub_commands = [('compile_translations', None)] + _build.sub_commands
+
+    def run(self):
+        print "creating VERSION file"
+        if os.path.exists('VERSION'):
+            os.remove('VERSION')
+        version = get_version()
+        version_file = open('VERSION', 'w')
+        version_file.write(version)
+        version_file.close()
+        _sdist.run(self)
+        print "removing VERSION file"
+        if os.path.exists('VERSION'):
+            os.remove('VERSION')
 
 class install_lib(_install_lib):
     def run(self):
@@ -87,6 +100,6 @@ setup(name="django-mellon",
           'build': build,
           'install_lib': install_lib,
           'compile_translations': compile_translations,
-          'sdist': sdist,
+          'sdist': eo_sdist,
       },
 )
