@@ -32,6 +32,7 @@ def create_metadata(request):
                 'logout_url': request.build_absolute_uri(logout_url),
                 'public_keys': public_keys,
                 'name_id_formats': name_id_formats,
+                'default_assertion_consumer_binding': app_settings.DEFAULT_ASSERTION_CONSUMER_BINDING,
             })
     return METADATA[entity_id]
 

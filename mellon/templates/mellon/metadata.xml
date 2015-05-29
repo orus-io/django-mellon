@@ -25,11 +25,16 @@
    {% endfor %}
    <AssertionConsumerService
      index="0"
+     {% if default_assertion_consumer_binding = 'artifact' %}
      isDefault="true"
+     {% endif %}
      Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact"
      Location="{{ login_url }}" />
    <AssertionConsumerService
      index="1"
+     {% if default_assertion_consumer_binding = 'post' %}
+     isDefault="true"
+     {% endif %}
      Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
      Location="{{ login_url }}" />
  </SPSSODescriptor>

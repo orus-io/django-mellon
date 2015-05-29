@@ -25,6 +25,7 @@ class AppSettings(object):
             'CREATE_GROUP': True,
             'ERROR_URL': None,
             'ERROR_REDIRECT_AFTER_TIMEOUT': 120,
+            'DEFAULT_ASSERTION_CONSUMER_BINDING': 'post', # or artifact
     }
 
     @property
