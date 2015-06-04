@@ -1,6 +1,8 @@
 1.2.15
 ------
 
+- authentication_failed.html: show the StatusMessage to the user if there is
+  one
 - add a Changelog
 - app_settings,views: make the default assertion consumer binding customizable
   (#7406)
