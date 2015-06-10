@@ -241,6 +241,11 @@ MELLON_ERROR_REDIRECT_AFTER_TIMEOUT
 Timeout in seconds before automatically redirecting the user to the
 continue URL when authentication has failed. Default is 120 seconds.
 
+MELLON_VERIFY_SSL_CERTIFICATE
+-----------------------------
+
+Verify SSL certificate when doing HTTP requests, used when resolving artifacts.
+Default is True.
 
 Tests
 =====

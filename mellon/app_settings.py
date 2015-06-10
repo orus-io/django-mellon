@@ -26,6 +26,7 @@ class AppSettings(object):
             'ERROR_URL': None,
             'ERROR_REDIRECT_AFTER_TIMEOUT': 120,
             'DEFAULT_ASSERTION_CONSUMER_BINDING': 'post', # or artifact
+            'VERIFY_SSL_CERTIFICATE': True,
     }
 
     @property

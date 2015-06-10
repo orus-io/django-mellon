@@ -1,5 +1,6 @@
 import logging
 import requests
+from requests.exceptions import RequestException
 
 from django.views.generic import View
 from django.http import HttpResponseBadRequest, HttpResponseRedirect, HttpResponse
@@ -139,18 +140,36 @@ class LoginView(LogMixin, View):
         return HttpResponseRedirect(next_url)
 
     def continue_sso_artifact_get(self, request):
-        login = utils.create_login(request)
-        login.initRequest(request.META['QUERY_STRING'], lasso.HTTP_METHOD_ARTIFACT_GET)
-        login.buildRequestMsg()
-
         idp_message = None
         status_codes = []
 
-        result = requests.post(login.msgUrl, data=login.msgBody,
-                headers={'content-type': 'text/xml'})
+        login = utils.create_login(request)
+        try:
+            login.initRequest(request.META['QUERY_STRING'], lasso.HTTP_METHOD_ARTIFACT_GET)
+        except lasso.ServerProviderNotFoundError:
+            self.log.warning('no entity id found for artifact %s',
+                             request.GET['SAMLart'])
+            return HttpResponseBadRequest(
+                'no entity id found for this artifact %r' %
+                request.GET['SAMLart'])
+        idp = utils.get_idp(login.remoteProviderId)
+        if not idp:
+            self.log.warning('entity id %r is unknown', login.remoteProviderId)
+            return HttpResponseBadRequest(
+                'entity id %r is unknown' % login.remoteProviderId)
+        verify_ssl_certificate = utils.get_setting(
+            idp, 'VERIFY_SSL_CERTIFICATE')
+        login.buildRequestMsg()
+        try:
+            result = requests.post(login.msgUrl, data=login.msgBody,
+                headers={'content-type': 'text/xml'},
+                verify=verify_ssl_certificate)
+        except RequestException, e:
+            self.log.warning('unable to reach %r: %s', login.msgUrl, e)
+            return HttpResponseBadRequest('unable to reach %r: %s' % (login.msgUrl, e))
         if result.status_code != 200:
             self.log.warning('SAML authentication failed: '\
-                             'IdP returned %s when given artifact' % result.status_code)
+                             'IdP returned %s when given artifact', result.status_code)
             return self.sso_failure(request, login, idp_message, status_codes)
 
         try:
@@ -174,6 +193,7 @@ class LoginView(LogMixin, View):
                 args.append(status.statusMessage)
             self.log.warning(*args)
         except lasso.Error, e:
+            self.log.exception('unexpected lasso error')
             return HttpResponseBadRequest('error processing the authentication '
                     'response: %r' % e)
         else:
