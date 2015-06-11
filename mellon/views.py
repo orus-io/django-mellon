@@ -173,7 +173,7 @@ class LoginView(LogMixin, View):
             return self.sso_failure(request, login, idp_message, status_codes)
 
         try:
-            login.processResponseMsg(result.text)
+            login.processResponseMsg(result.content)
             login.acceptSso()
         except lasso.ProfileCannotVerifySignatureError:
             self.log.warning('SAML authentication failed: signature validation failed for %r',
