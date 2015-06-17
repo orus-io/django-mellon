@@ -51,7 +51,7 @@ Session
 =======
 
 After an authentication attributes are stored in the session using a
-dictionnary, the key is `mellon_session`. The dictionnary contains:
+dictionary, the key is `mellon_session`. The dictionary contains:
 
  - issuer: the EntityID of the identity provider
  - name_id_content: the value of the NameID
