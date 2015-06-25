@@ -1,3 +1,4 @@
+import logging
 import re
 import time
 import datetime
@@ -147,6 +148,7 @@ def get_setting(idp, name, default=None):
     return idp.get(name) or getattr(app_settings, name, default)
 
 def create_logout(request):
+    logger = logging.getLogger(__name__)
     server = create_server(request)
     mellon_session = request.session.get('mellon_session', {})
     entity_id = mellon_session.get('issuer')
@@ -163,6 +165,7 @@ def create_logout(request):
             'name_id_name_qualifier': name_id_name_qualifier,
             'name_id_sp_name_qualifier': name_id_sp_name_qualifier,
     })
+    logger.debug('session_dump %s', session_dump)
     logout = lasso.Logout(server)
     if not app_settings.PRIVATE_KEY:
         logout.setSignatureHint(lasso.PROFILE_SIGNATURE_HINT_FORBID)
