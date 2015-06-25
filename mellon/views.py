@@ -12,6 +12,8 @@ from django.utils.http import same_origin
 
 import lasso
 
+lasso.setFlag('thin-sessions')
+
 from . import utils
 
 class LogMixin(object):
