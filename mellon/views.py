@@ -267,9 +267,9 @@ class LogoutView(LogMixin, View):
             self.log.warning('error validating logout request: %r' % e)
         issuer = request.session.get('mellon_session', {}).get('issuer')
         if issuer == logout.remoteProviderId:
-            auth.logout(request)
             self.log.info('user %r logged out by SLO request',
                     unicode(request.user))
+            auth.logout(request)
         try:
             logout.buildResponseMsg()
         except lasso.Error, e:
