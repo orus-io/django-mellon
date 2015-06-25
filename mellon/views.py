@@ -99,9 +99,11 @@ class LoginView(LogMixin, View):
             attributes.update({
                 'name_id_content': name_id.content.decode('utf8'),
                 'name_id_format': unicode(name_id.format or lasso.SAML2_NAME_IDENTIFIER_FORMAT_UNSPECIFIED),
-                'name_id_name_qualifier': unicode(name_id.nameQualifier if name_id.nameQualifier else login.remoteProviderId),
-                'name_id_sp_name_qualifier': unicode(name_id.spNameQualifier if name_id.spNameQualifier else login.server.providerId),
             })
+            if name_id.nameQualifier:
+                attributes['name_id_name_qualifier'] = unicode(name_id.nameQualifier)
+            if name_id.spNameQualifier:
+                attributes['name_id_sp_name_qualifier'] = unicode(name_id.spNameQualifier)
         authn_statement = login.assertion.authnStatement[0]
         if authn_statement.authnInstant:
             attributes['authn_instant'] = utils.iso8601_to_datetime(authn_statement.authnInstant)
