@@ -5,7 +5,7 @@ import datetime
 import importlib
 from functools import wraps
 from xml.etree import ElementTree as ET
-import urllib
+import requests
 
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
@@ -68,7 +68,10 @@ def create_server(request):
             server.setEncryptionPrivateKeyWithPassword(key, password)
         for idp in idps:
             if 'METADATA_URL' in idp and 'METADATA' not in idp:
-                idp['METADATA'] = urllib.urlopen(idp['METADATA_URL']).read()
+                verify_ssl_certificate = get_setting(
+                    idp, 'VERIFY_SSL_CERTIFICATE')
+                idp['METADATA'] = requests.get(idp['METADATA_URL'],
+                                    verify=verify_ssl_certificate).content
             metadata = idp['METADATA']
             if metadata.startswith('/'):
                 metadata = file(metadata).read()
