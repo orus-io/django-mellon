@@ -45,7 +45,9 @@ class LoginView(LogMixin, View):
                     login.remoteProviderId)
         except lasso.ParamError:
             self.log.exception('lasso param error')
-        except (lasso.ProfileStatusNotSuccessError, lasso.ProfileRequestDeniedError):
+        except (lasso.LoginStatusNotSuccessError,
+                lasso.ProfileStatusNotSuccessError,
+                lasso.ProfileRequestDeniedError):
             status = login.response.status
             a = status
             while a.statusCode:
