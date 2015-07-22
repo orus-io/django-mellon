@@ -77,3 +77,16 @@ def test_provision(settings):
     adapter.provision(user, idp, local_saml_attributes)
     assert not user.email
     User.objects.all().delete()
+
+    local_saml_attributes = saml_attributes.copy()
+    settings.MELLON_ATTRIBUTE_MAPPING = {
+        'email': '{attributes[email][0]}',
+        'first_name': '{attributes[first_name][0]}',
+        'last_name': '{attributes[last_name][0]}',
+    }
+    local_saml_attributes['first_name'] = [('y' * 32)]
+    user = User(username='xx')
+    user.save()
+    adapter.provision(user, idp, local_saml_attributes)
+    assert user.first_name == 'y' * 30
+    User.objects.all().delete()

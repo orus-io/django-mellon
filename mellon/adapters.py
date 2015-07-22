@@ -87,6 +87,9 @@ class DefaultAdapter(object):
                 log.warning('invalid reference in attribute mapping template %r: %s', tpl, e)
             else:
                 attribute_set = True
+                model_field = user._meta.get_field(field)
+                if hasattr(model_field, 'max_length'):
+                    value = value[:model_field.max_length]
                 setattr(user, field, value)
         if attribute_set:
             user.save()
