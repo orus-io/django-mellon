@@ -27,6 +27,8 @@ class AppSettings(object):
             'ERROR_REDIRECT_AFTER_TIMEOUT': 120,
             'DEFAULT_ASSERTION_CONSUMER_BINDING': 'post', # or artifact
             'VERIFY_SSL_CERTIFICATE': True,
+            'OPENED_SESSION_COOKIE_NAME': None,
+            'OPENED_SESSION_COOKIE_DOMAIN': None,
     }
 
     @property
