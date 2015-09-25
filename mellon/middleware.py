@@ -2,9 +2,10 @@ from django.utils.http import urlencode
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 
-from . import app_settings
+from . import app_settings, utils
 
 PASSIVE_TRIED_COOKIE = 'MELLON_PASSIVE_TRIED'
+
 
 class PassiveAuthenticationMiddleware(object):
     def process_response(self, request, response):
@@ -16,6 +17,8 @@ class PassiveAuthenticationMiddleware(object):
         return response
 
     def process_request(self, request):
+        if not any(utils.get_idps()):
+            return
         if not app_settings.OPENED_SESSION_COOKIE_NAME:
             return
         if hasattr(request, 'user') and request.user.is_authenticated():
@@ -27,7 +30,7 @@ class PassiveAuthenticationMiddleware(object):
             common_domain = app_settings.OPENED_SESSION_COOKIE_DOMAIN
             if not common_domain:
                 common_domain = request.META['SERVER_NAME'].split('.', 1)[1]
-                assert '.' in commom_domain # if domain is xxx.com explode !
+                assert '.' in common_domain  # if domain is xxx.com explode !
             params = {
                 'next': request.build_absolute_uri(),
                 'passive': '',
@@ -37,4 +40,3 @@ class PassiveAuthenticationMiddleware(object):
             # prevent loops
             response.set_cookie(PASSIVE_TRIED_COOKIE, value='1', max_age=None)
             return response
-
