@@ -142,16 +142,8 @@ class LoginView(LogMixin, View):
             return render(request, 'mellon/user_not_found.html', {
                 'saml_attributes': attributes })
         request.session['lasso_session_dump'] = login.session.dump()
-        iframe = login.msgRelayState.startswith('iframe+')
-        if iframe:
-            login.msgRelayState = login.msgRelayState[len('iframe+'):]
         next_url = login.msgRelayState or resolve_url(settings.LOGIN_REDIRECT_URL)
-        if iframe:
-            return render(request, 'mellon/pop_iframe.html', {
-                      'next_url': next_url,
-                    })
-        else:
-            return HttpResponseRedirect(next_url)
+        return HttpResponseRedirect(next_url)
 
     def continue_sso_artifact_get(self, request):
         idp_message = None
@@ -218,7 +210,6 @@ class LoginView(LogMixin, View):
 
     def get(self, request, *args, **kwargs):
         '''Initialize login request'''
-        iframe = 'iframe' in request.GET
         if 'SAMLart' in request.GET:
             return self.continue_sso_artifact_get(request)
         next_url = request.GET.get('next')
@@ -248,8 +239,6 @@ class LoginView(LogMixin, View):
                 req_authncontext.authnContextClassRef = authn_classref
             if next_url:
                 login.msgRelayState = next_url
-            if iframe:
-                login.msgRelayState = 'iframe+' + (login.msgRelayState or '')
             login.buildAuthnRequestMsg()
         except lasso.Error, e:
             return HttpResponseBadRequest('error initializing the '

@@ -1,8 +1,0 @@
-{% extends "mellon/base.html" %}
-{% load i18n %}
-
-{% block mellon_extra_scripts %}
-<script>
-	top.location.href = "{{ next_url|escapejs }}";
-</script>
-{% endblock %}
