@@ -17,6 +17,9 @@ class PassiveAuthenticationMiddleware(object):
         return response
 
     def process_request(self, request):
+        # Skip mellon views
+        if request.resolver_match.url_name.startswith('mellon_'):
+            return
         if not any(utils.get_idps()):
             return
         if not app_settings.OPENED_SESSION_COOKIE_NAME:
