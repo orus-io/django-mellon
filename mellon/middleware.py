@@ -16,7 +16,7 @@ class PassiveAuthenticationMiddleware(object):
             response.delete_cookie(PASSIVE_TRIED_COOKIE)
         return response
 
-    def process_request(self, request):
+    def process_view(self, request, view_func, view_args, view_kwargs):
         # Skip mellon views
         if request.resolver_match.url_name.startswith('mellon_'):
             return
