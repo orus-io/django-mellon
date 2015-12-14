@@ -16,6 +16,7 @@ saml_attributes = {
     'first_name': ['Foo'],
     'last_name': ['Bar'],
     'is_superuser': ['true'],
+    'group': ['GroupA', 'GroupB', 'GroupC'],
 }
 
 def test_format_username(settings):
@@ -45,6 +46,7 @@ def test_lookup_user(settings):
     assert User.objects.count() == 0
 
 def test_provision(settings):
+    settings.MELLON_GROUP_ATTRIBUTE = 'group'
     User = auth.get_user_model()
     adapter = DefaultAdapter()
     settings.MELLON_ATTRIBUTE_MAPPING = {
@@ -59,6 +61,13 @@ def test_provision(settings):
     assert user.last_name == 'Bar'
     assert user.email == 'test@example.net'
     assert user.is_superuser == False
+    assert user.groups.count() == 3
+    assert set(user.groups.values_list('name', flat=True)) == set(saml_attributes['group'])
+    saml_attributes2 = saml_attributes.copy()
+    saml_attributes2['group'] = ['GroupB', 'GroupC']
+    adapter.provision(user, idp, saml_attributes2)
+    assert user.groups.count() == 2
+    assert set(user.groups.values_list('name', flat=True)) == set(saml_attributes2['group'])
     User.objects.all().delete()
 
     settings.MELLON_SUPERUSER_MAPPING = {

@@ -6,9 +6,11 @@ from django.contrib.auth.models import Group
 
 from . import utils, app_settings, models
 
-log = logging.getLogger(__name__)
 
 class DefaultAdapter(object):
+    def __init__(self, *args, **kwargs):
+        self.logger = logging.getLogger(__name__)
+
     def get_idp(self, entity_id):
         '''Find the first IdP definition matching entity_id'''
         for idp in app_settings.IDENTITY_PROVIDERS:
@@ -36,12 +38,12 @@ class DefaultAdapter(object):
             username = unicode(username_template).format(
                 realm=realm, attributes=saml_attributes, idp=idp)[:30]
         except ValueError:
-            log.error('invalid username template %r'. username_template)
+            self.logger.error(u'invalid username template %r', username_template)
         except (AttributeError, KeyError, IndexError), e:
-            log.error('invalid reference in username template %r: %s',
+            self.logger.error(u'invalid reference in username template %r: %s',
                     username_template, e)
         except Exception, e:
-            log.exception('unknown error when formatting username')
+            self.logger.exception(u'unknown error when formatting username')
         else:
             return username
 
@@ -82,9 +84,9 @@ class DefaultAdapter(object):
             try:
                 value = unicode(tpl).format(realm=realm, attributes=saml_attributes, idp=idp)
             except ValueError:
-                log.warning('invalid attribute mapping template %r', tpl)
+                self.logger.warning(u'invalid attribute mapping template %r', tpl)
             except (AttributeError, KeyError, IndexError, ValueError), e:
-                log.warning('invalid reference in attribute mapping template %r: %s', tpl, e)
+                self.logger.warning(u'invalid reference in attribute mapping template %r: %s', tpl, e)
             else:
                 attribute_set = True
                 model_field = user._meta.get_field(field)
@@ -118,6 +120,7 @@ class DefaultAdapter(object):
                 user.save()
 
     def provision_groups(self, user, idp, saml_attributes):
+        User = user.__class__
         group_attribute = utils.get_setting(idp, 'GROUP_ATTRIBUTE')
         create_group = utils.get_setting(idp, 'CREATE_GROUP')
         if group_attribute in saml_attributes:
@@ -134,4 +137,11 @@ class DefaultAdapter(object):
                     except Group.DoesNotExist:
                         continue
                 groups.append(group)
-            user.groups = groups
+            for group in Group.objects.filter(pk__in=[g.pk for g in groups]).exclude(user=user):
+                self.logger.info(u'adding group %s (%s) to user %s (%s)', group, group.pk, user, user.pk)
+                User.groups.through.objects.get_or_create(group=group, user=user)
+            qs = User.groups.through.objects.exclude(group__pk__in=[g.pk for g in groups]).filter(user=user)
+            for rel in qs:
+                self.logger.info(u'removing group %s (%s) from user %s (%s)', rel.group,
+                                 rel.group.pk, rel.user, rel.user.pk)
+            qs.delete()
