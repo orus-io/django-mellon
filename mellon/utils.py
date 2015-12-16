@@ -9,6 +9,7 @@ import requests
 
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
+from django.utils.timezone import make_aware, utc, now
 import lasso
 
 from . import app_settings
@@ -102,6 +103,7 @@ def get_idps():
                 yield idp
 
 def flatten_datetime(d):
+    d = d.copy()
     for key, value in d.iteritems():
         if isinstance(value, datetime.datetime):
             d[key] = value.isoformat() + 'Z'
@@ -116,7 +118,10 @@ def iso8601_to_datetime(date_string):
     if not m:
         raise ValueError('Invalid ISO8601 date')
     tm = time.strptime(m.group(1)+'Z', "%Y-%m-%dT%H:%M:%SZ")
-    return datetime.datetime.fromtimestamp(time.mktime(tm))
+    return make_aware(datetime.datetime.fromtimestamp(time.mktime(tm)), utc)
+
+def get_seconds_expiry(datetime_expiry):
+    return (datetime_expiry - now()).total_seconds()
 
 def to_list(func):
     @wraps(func)

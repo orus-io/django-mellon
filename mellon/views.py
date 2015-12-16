@@ -133,7 +133,7 @@ class LoginView(LogMixin, View):
                         unicode(user), attributes['name_id_content'])
                 request.session['mellon_session'] = utils.flatten_datetime(attributes)
                 if 'session_not_on_or_after' in attributes:
-                    request.session.set_expiry(attributes['session_not_on_or_after'])
+                    request.session.set_expiry(utils.get_seconds_expiry(attributes['session_not_on_or_after']))
             else:
                 return render(request, 'mellon/inactive_user.html', {
                     'user': user,
