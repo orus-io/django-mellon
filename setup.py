@@ -24,6 +24,7 @@ class compile_translations(Command):
     def run(self):
         import os
         from django.core.management import call_command
+        os.environ.pop('DJANGO_SETTINGS_MODULE', None)
         for path in ['mellon/']:
             if path.endswith('.py'):
                 continue
