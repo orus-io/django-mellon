@@ -9,7 +9,8 @@ import requests
 
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
-from django.utils.timezone import make_aware, utc, now
+from django.utils.timezone import make_aware, utc, now, make_naive
+from django.conf import settings
 import lasso
 
 from . import app_settings
@@ -118,7 +119,10 @@ def iso8601_to_datetime(date_string):
     if not m:
         raise ValueError('Invalid ISO8601 date')
     tm = time.strptime(m.group(1)+'Z', "%Y-%m-%dT%H:%M:%SZ")
-    return make_aware(datetime.datetime.fromtimestamp(time.mktime(tm)), utc)
+    dt = make_aware(datetime.datetime.fromtimestamp(time.mktime(tm)), utc)
+    if not settings.USE_TZ:
+        dt = make_naive(dt)
+    return dt
 
 def get_seconds_expiry(datetime_expiry):
     return (datetime_expiry - now()).total_seconds()
