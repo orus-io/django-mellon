@@ -253,3 +253,15 @@ Tests
 Unit tests are written using pytest, and can be run with:
 
    DJANGO_SETTINGS_MODULE=testsettings py.test
+
+Remarks
+=======
+
+To honor the SessionNotOnOrAfter attribute sent by an IdP you must use a specific SessionEngine,
+only db and cached_db are supported currently, the equivalent session engines are:
+
+    mellon.sessions_backends.db
+
+and
+
+    mellon.sessions_backends.cached_db
