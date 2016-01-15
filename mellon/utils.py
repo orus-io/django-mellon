@@ -6,10 +6,11 @@ import importlib
 from functools import wraps
 from xml.etree import ElementTree as ET
 import requests
+import dateutil.parser
 
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
-from django.utils.timezone import make_aware, utc, now, make_naive
+from django.utils.timezone import make_aware, utc, now, make_naive, is_aware
 from django.conf import settings
 import lasso
 
@@ -115,13 +116,13 @@ def iso8601_to_datetime(date_string):
        value.
 
        This function ignores the sub-second resolution'''
-    m = re.match(r'(\d+-\d+-\d+T\d+:\d+:\d+)(?:\.\d+)?Z$', date_string)
-    if not m:
-        raise ValueError('Invalid ISO8601 date')
-    tm = time.strptime(m.group(1)+'Z', "%Y-%m-%dT%H:%M:%SZ")
-    dt = make_aware(datetime.datetime.fromtimestamp(time.mktime(tm)), utc)
-    if not settings.USE_TZ:
-        dt = make_naive(dt)
+    dt = dateutil.parser.parse(date_string)
+    if is_aware(dt):
+        if not settings.USE_TZ:
+            dt = make_naive(dt)
+    else:
+        if settings.USE_TZ:
+            dt = make_aware(dt)
     return dt
 
 def get_seconds_expiry(datetime_expiry):
