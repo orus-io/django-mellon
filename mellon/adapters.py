@@ -115,7 +115,8 @@ class DefaultAdapter(object):
                     user.save()
                     break
         else:
-            if user.is_superuser:
+            if user.is_superuser or user.is_staff:
+                user.is_staff = False
                 user.is_superuser = False
                 user.save()
 
