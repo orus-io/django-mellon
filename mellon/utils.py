@@ -6,6 +6,7 @@ import importlib
 from functools import wraps
 from xml.etree import ElementTree as ET
 import requests
+import requests.exceptions
 import dateutil.parser
 
 from django.core.urlresolvers import reverse
@@ -43,6 +44,7 @@ def create_metadata(request):
 SERVERS = {}
 
 def create_server(request):
+    logger = logging.getLogger(__name__)
     root = request.build_absolute_uri('/')
     if root not in SERVERS:
         idps = get_idps()
@@ -69,17 +71,32 @@ def create_server(request):
                 password = key[1]
                 key = key[0]
             server.setEncryptionPrivateKeyWithPassword(key, password)
-        for idp in idps:
+        for i, idp in enumerate(idps):
             if 'METADATA_URL' in idp and 'METADATA' not in idp:
                 verify_ssl_certificate = get_setting(
                     idp, 'VERIFY_SSL_CERTIFICATE')
-                idp['METADATA'] = requests.get(idp['METADATA_URL'],
-                                    verify=verify_ssl_certificate).content
-            metadata = idp['METADATA']
-            if metadata.startswith('/'):
-                metadata = file(metadata).read()
+                try:
+                    response = requests.get(idp['METADATA_URL'],
+                                        verify=verify_ssl_certificate)
+                    response.raise_for_status()
+                except requests.exceptions.RequestException, e:
+                    logger.error(u'retrieval of metadata URL %r failed with error %s for %d-th idp',
+                                 idp['METADATA_URL'], e, i)
+                    continue
+                metadata = response.content
+            elif 'METADATA' in idp:
+                if idp['METADATA'].startswith('/'):
+                    metadata = file(idp['METADATA']).read()
+            else:
+                logger.error(u'missing METADATA or METADATA_URL in %d-th idp', i)
+                continue
+            try:
+                server.addProviderFromBuffer(lasso.PROVIDER_ROLE_IDP, metadata)
+            except lasso.Error, e:
+                logger.error(u'bad metadata in %d-th idp: %s', i, e)
+                continue
             idp['ENTITY_ID'] = ET.fromstring(metadata).attrib['entityID']
-            server.addProviderFromBuffer(lasso.PROVIDER_ROLE_IDP, metadata)
+            idp['METADATA'] = metadata
         SERVERS[root] = server
     return SERVERS[root]
 
