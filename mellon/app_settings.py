@@ -1,34 +1,35 @@
 import sys
 from django.core.exceptions import ImproperlyConfigured
 
+
 class AppSettings(object):
     __PREFIX = 'MELLON_'
     __DEFAULTS = {
-            'PUBLIC_KEYS': (),
-            'PRIVATE_KEY': None,
-            'PRIVATE_KEYS': (),
-            'PRIVATE_KEY_PASSWORD': None,
-            'NAME_ID_FORMATS': (),
-            'NAME_ID_POLICY_FORMAT': None,
-            'NAME_ID_POLICY_ALLOW_CREATE': True,
-            'FORCE_AUTHN': False,
-            'ADAPTER': (
-                'mellon.adapters.DefaultAdapter',
-             ),
-            'REALM': 'saml',
-            'PROVISION': True,
-            'USERNAME_TEMPLATE': '{attributes[name_id_content]}@{realm}',
-            'ATTRIBUTE_MAPPING': {},
-            'SUPERUSER_MAPPING': {},
-            'AUTHN_CLASSREF': (),
-            'GROUP_ATTRIBUTE': None,
-            'CREATE_GROUP': True,
-            'ERROR_URL': None,
-            'ERROR_REDIRECT_AFTER_TIMEOUT': 120,
-            'DEFAULT_ASSERTION_CONSUMER_BINDING': 'post', # or artifact
-            'VERIFY_SSL_CERTIFICATE': True,
-            'OPENED_SESSION_COOKIE_NAME': None,
-            'OPENED_SESSION_COOKIE_DOMAIN': None,
+        'PUBLIC_KEYS': (),
+        'PRIVATE_KEY': None,
+        'PRIVATE_KEYS': (),
+        'PRIVATE_KEY_PASSWORD': None,
+        'NAME_ID_FORMATS': (),
+        'NAME_ID_POLICY_FORMAT': None,
+        'NAME_ID_POLICY_ALLOW_CREATE': True,
+        'FORCE_AUTHN': False,
+        'ADAPTER': (
+            'mellon.adapters.DefaultAdapter',
+        ),
+        'REALM': 'saml',
+        'PROVISION': True,
+        'USERNAME_TEMPLATE': '{attributes[name_id_content]}@{realm}',
+        'ATTRIBUTE_MAPPING': {},
+        'SUPERUSER_MAPPING': {},
+        'AUTHN_CLASSREF': (),
+        'GROUP_ATTRIBUTE': None,
+        'CREATE_GROUP': True,
+        'ERROR_URL': None,
+        'ERROR_REDIRECT_AFTER_TIMEOUT': 120,
+        'DEFAULT_ASSERTION_CONSUMER_BINDING': 'post',  # or artifact
+        'VERIFY_SSL_CERTIFICATE': True,
+        'OPENED_SESSION_COOKIE_NAME': None,
+        'OPENED_SESSION_COOKIE_DOMAIN': None,
     }
 
     @property

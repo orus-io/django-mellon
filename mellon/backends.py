@@ -21,7 +21,7 @@ class SAMLBackend(ModelBackend):
             user = adapter.lookup_user(idp, saml_attributes)
             if user:
                 break
-        else: # no user found
+        else:  # no user found
             return
         for adapter in adapters:
             if not hasattr(adapter, 'provision'):

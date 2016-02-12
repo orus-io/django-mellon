@@ -1,7 +1,6 @@
 import threading
 import pytest
 
-from django.conf import settings
 from django.contrib import auth
 from django.db import connection
 
@@ -11,7 +10,7 @@ pytestmark = pytest.mark.django_db
 
 idp = {}
 saml_attributes = {
-    'name_id_content': 'x'*32,
+    'name_id_content': 'x' * 32,
     'issuer': 'https://idp.example.net/saml/metadata',
     'username': ['foobar'],
     'email': ['test@example.net'],
@@ -21,14 +20,16 @@ saml_attributes = {
     'group': ['GroupA', 'GroupB', 'GroupC'],
 }
 
+
 def test_format_username(settings):
     adapter = DefaultAdapter()
-    assert adapter.format_username(idp, {}) == None
-    assert adapter.format_username(idp, saml_attributes) == ('x'*32 + '@saml')[:30]
+    assert adapter.format_username(idp, {}) is None
+    assert adapter.format_username(idp, saml_attributes) == ('x' * 32 + '@saml')[:30]
     settings.MELLON_USERNAME_TEMPLATE = '{attributes[name_id_content]}'
-    assert adapter.format_username(idp, saml_attributes) == ('x'*32)[:30]
+    assert adapter.format_username(idp, saml_attributes) == ('x' * 32)[:30]
     settings.MELLON_USERNAME_TEMPLATE = '{attributes[username][0]}'
     assert adapter.format_username(idp, saml_attributes) == 'foobar'
+
 
 def test_lookup_user(settings):
     User = auth.get_user_model()
@@ -83,7 +84,7 @@ def test_provision(settings):
     assert user.first_name == 'Foo'
     assert user.last_name == 'Bar'
     assert user.email == 'test@example.net'
-    assert user.is_superuser == False
+    assert user.is_superuser is False
     assert user.groups.count() == 3
     assert set(user.groups.values_list('name', flat=True)) == set(saml_attributes['group'])
     saml_attributes2 = saml_attributes.copy()
@@ -99,7 +100,7 @@ def test_provision(settings):
     user = User(username='xx')
     user.save()
     adapter.provision(user, idp, saml_attributes)
-    assert user.is_superuser == True
+    assert user.is_superuser is True
     User.objects.all().delete()
 
     local_saml_attributes = saml_attributes.copy()

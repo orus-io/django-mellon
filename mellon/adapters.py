@@ -41,8 +41,8 @@ class DefaultAdapter(object):
         except ValueError:
             self.logger.error(u'invalid username template %r', username_template)
         except (AttributeError, KeyError, IndexError), e:
-            self.logger.error(u'invalid reference in username template %r: %s',
-                    username_template, e)
+            self.logger.error(
+                u'invalid reference in username template %r: %s', username_template, e)
         except Exception, e:
             self.logger.exception(u'unknown error when formatting username')
         else:
@@ -89,7 +89,8 @@ class DefaultAdapter(object):
             except ValueError:
                 self.logger.warning(u'invalid attribute mapping template %r', tpl)
             except (AttributeError, KeyError, IndexError, ValueError), e:
-                self.logger.warning(u'invalid reference in attribute mapping template %r: %s', tpl, e)
+                self.logger.warning(
+                    u'invalid reference in attribute mapping template %r: %s', tpl, e)
             else:
                 attribute_set = True
                 model_field = user._meta.get_field(field)
@@ -142,9 +143,11 @@ class DefaultAdapter(object):
                         continue
                 groups.append(group)
             for group in Group.objects.filter(pk__in=[g.pk for g in groups]).exclude(user=user):
-                self.logger.info(u'adding group %s (%s) to user %s (%s)', group, group.pk, user, user.pk)
+                self.logger.info(
+                    u'adding group %s (%s) to user %s (%s)', group, group.pk, user, user.pk)
                 User.groups.through.objects.get_or_create(group=group, user=user)
-            qs = User.groups.through.objects.exclude(group__pk__in=[g.pk for g in groups]).filter(user=user)
+            qs = User.groups.through.objects.exclude(
+                group__pk__in=[g.pk for g in groups]).filter(user=user)
             for rel in qs:
                 self.logger.info(u'removing group %s (%s) from user %s (%s)', rel.group,
                                  rel.group.pk, rel.user, rel.user.pk)
