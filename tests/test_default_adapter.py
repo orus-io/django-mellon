@@ -1,7 +1,9 @@
+import threading
 import pytest
 
 from django.conf import settings
 from django.contrib import auth
+from django.db import connection
 
 from mellon.adapters import DefaultAdapter
 
@@ -44,6 +46,27 @@ def test_lookup_user(settings):
     user = adapter.lookup_user(idp, saml_attributes)
     assert user is None
     assert User.objects.count() == 0
+
+
+def test_lookup_user_transaction(transactional_db, concurrency):
+    adapter = DefaultAdapter()
+    N = 30
+    def map_threads(f, l):
+        threads = []
+        for i in l:
+            threads.append(threading.Thread(target=f, args=(i,)))
+            threads[-1].start()
+        for thread in threads:
+            thread.join()
+    users = []
+
+    def f(i):
+        users.append(adapter.lookup_user(idp, saml_attributes))
+        connection.close()
+    map_threads(f, range(concurrency))
+    assert len(users) == concurrency
+    assert len(set(user.pk for user in users)) == 1
+
 
 def test_provision(settings):
     settings.MELLON_GROUP_ATTRIBUTE = 'group'

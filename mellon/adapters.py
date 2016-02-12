@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from django.core.exceptions import PermissionDenied
 from django.contrib import auth
@@ -53,28 +54,30 @@ class DefaultAdapter(object):
         issuer = saml_attributes['issuer']
         try:
             return User.objects.get(saml_identifiers__name_id=name_id,
-                    saml_identifiers__issuer=issuer)
+                                    saml_identifiers__issuer=issuer)
         except User.DoesNotExist:
             if not utils.get_setting(idp, 'PROVISION'):
+                self.logger.warning('provisionning disabled, login refused')
                 return None
             username = self.format_username(idp, saml_attributes)
             if not username:
+                self.logger.warning('could not build a username, login refused')
                 return None
-            user = User(username=username)
-            user.save()
-            self.provision_name_id(user, idp, saml_attributes)
+            user = User.objects.create(username=uuid.uuid4().hex[:30])
+            saml_id, created = models.UserSAMLIdentifier.objects.get_or_create(
+                name_id=name_id, issuer=issuer, defaults={'user': user})
+            if created:
+                user.username = username
+                user.save()
+            else:
+                user.delete()
+                user = saml_id.user
         return user
 
     def provision(self, user, idp, saml_attributes):
         self.provision_attribute(user, idp, saml_attributes)
         self.provision_superuser(user, idp, saml_attributes)
         self.provision_groups(user, idp, saml_attributes)
-
-    def provision_name_id(self, user, idp, saml_attributes):
-        models.UserSAMLIdentifier.objects.get_or_create(
-                user=user,
-                issuer=saml_attributes['issuer'],
-                name_id=saml_attributes['name_id_content'])
 
     def provision_attribute(self, user, idp, saml_attributes):
         realm = utils.get_setting(idp, 'REALM')

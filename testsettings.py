@@ -4,6 +4,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': 'mellon.sqlite3',
+        'TEST': {
+            'NAME': 'mellon-test.sqlite',
+        },
     }
 }
 DEBUG = True
