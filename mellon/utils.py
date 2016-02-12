@@ -93,7 +93,8 @@ def create_server(request):
             try:
                 server.addProviderFromBuffer(lasso.PROVIDER_ROLE_IDP, metadata)
             except lasso.Error, e:
-                logger.error(u'bad metadata in %d-th idp: %s', i, e)
+                logger.error(u'bad metadata in %d-th idp', i)
+                logger.debug(u'lasso error: %s', e)
                 continue
             idp['ENTITY_ID'] = ET.fromstring(metadata).attrib['entityID']
             idp['METADATA'] = metadata
