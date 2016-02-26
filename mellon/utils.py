@@ -8,6 +8,7 @@ from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.timezone import make_aware, now, make_naive, is_aware, get_default_timezone
 from django.conf import settings
+from django.utils.six.moves.urllib.parse import urlparse
 import lasso
 
 from . import app_settings
@@ -197,3 +198,14 @@ def create_logout(request):
 
 def is_nonnull(s):
     return not '\x00' in s
+
+
+def same_origin(url1, url2):
+    """
+    Checks if two URLs are 'same-origin'
+    """
+    p1, p2 = urlparse(url1), urlparse(url2)
+    try:
+        return (p1.scheme, p1.hostname, p1.port) == (p2.scheme, p2.hostname, p2.port)
+    except ValueError:
+        return False

@@ -164,7 +164,10 @@ def test_iso8601_to_datetime(private_settings):
     import pytz
 
     private_settings.TIME_ZONE = 'UTC'
+    if hasattr(django.utils.timezone.get_default_timezone, 'cache_clear'):
+        django.utils.timezone.get_default_timezone.cache_clear()
     django.utils.timezone._localtime = None
+    private_settings.USE_TZ = False
     # UTC ISO8601 -> naive datetime UTC
     assert iso8601_to_datetime('2010-10-01T10:10:34Z') == datetime.datetime(
         2010, 10, 01, 10, 10, 34)

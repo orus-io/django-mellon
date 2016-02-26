@@ -9,7 +9,7 @@ from django.contrib import auth
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect, resolve_url
-from django.utils.http import same_origin, urlencode
+from django.utils.http import urlencode
 
 from . import app_settings
 
@@ -26,7 +26,7 @@ class LogMixin(object):
 
 class LoginView(LogMixin, View):
     def get_idp(self, request):
-        entity_id = request.REQUEST.get('entityID')
+        entity_id = request.POST.get('entityID') or request.GET.get('entityID')
         if not entity_id:
             for idp in utils.get_idps():
                 return idp
@@ -315,7 +315,7 @@ class LogoutView(LogMixin, View):
         next_url = resolve_url(settings.LOGIN_REDIRECT_URL)
         next_url = request.GET.get('next') or next_url
         referer = request.META.get('HTTP_REFERER')
-        if not referer or same_origin(referer, request.build_absolute_uri()):
+        if not referer or utils.same_origin(referer, request.build_absolute_uri()):
             if request.user.is_authenticated():
                 try:
                     issuer = request.session.get('mellon_session', {}).get('issuer')
@@ -357,7 +357,7 @@ class LogoutView(LogMixin, View):
             logout.processResponseMsg(request.META['QUERY_STRING'])
         except lasso.Error, e:
             self.log.error('unable to process a logout response %r', e)
-        if logout.msgRelayState and same_origin(logout.msgRelayState, request.build_absolute_uri()):
+        if logout.msgRelayState and utils.same_origin(logout.msgRelayState, request.build_absolute_uri()):
             return redirect(logout.msgRelayState)
         return redirect(next_url)
 
