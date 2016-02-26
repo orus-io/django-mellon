@@ -17,11 +17,11 @@ import lasso
 
 from . import app_settings
 
-METADATA = {}
 
 def create_metadata(request):
     entity_id = reverse('mellon_metadata')
-    if entity_id not in METADATA:
+    cache = getattr(settings, '_MELLON_METADATA_CACHE', {})
+    if not entity_id in cache:
         login_url = reverse('mellon_login')
         logout_url = reverse('mellon_logout')
         public_keys = []
@@ -31,15 +31,16 @@ def create_metadata(request):
                 public_key = ''.join(file(public_key).read().splitlines()[1:-1])
             public_keys.append(public_key)
         name_id_formats = app_settings.NAME_ID_FORMATS
-        return render_to_string('mellon/metadata.xml', {
-                'entity_id': request.build_absolute_uri(entity_id),
-                'login_url': request.build_absolute_uri(login_url),
-                'logout_url': request.build_absolute_uri(logout_url),
-                'public_keys': public_keys,
-                'name_id_formats': name_id_formats,
-                'default_assertion_consumer_binding': app_settings.DEFAULT_ASSERTION_CONSUMER_BINDING,
-            })
-    return METADATA[entity_id]
+        cache[entity_id] = render_to_string('mellon/metadata.xml', {
+            'entity_id': request.build_absolute_uri(entity_id),
+            'login_url': request.build_absolute_uri(login_url),
+            'logout_url': request.build_absolute_uri(logout_url),
+            'public_keys': public_keys,
+            'name_id_formats': name_id_formats,
+            'default_assertion_consumer_binding': app_settings.DEFAULT_ASSERTION_CONSUMER_BINDING,
+        })
+        settings._MELLON_METADATA_CACHE = cache
+    return settings._MELLON_METADATA_CACHE[entity_id]
 
 SERVERS = {}
 
