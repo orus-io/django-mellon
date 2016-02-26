@@ -1,3 +1,4 @@
+import logging
 import pytest
 import django_webtest
 
@@ -32,3 +33,12 @@ def private_settings(request):
         django.conf.settings._wrapped = old
     request.addfinalizer(finalizer)
     return django.conf.settings
+
+
+@pytest.fixture
+def caplog(caplog):
+    import py.io
+    caplog.setLevel(logging.INFO)
+    caplog.handler.stream = py.io.TextIO()
+    caplog.handler.records = []
+    return caplog

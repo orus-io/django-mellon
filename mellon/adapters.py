@@ -69,6 +69,8 @@ class DefaultAdapter(object):
             if created:
                 user.username = username
                 user.save()
+                self.logger.info('created new user %s with name_id %s from issuer %s',
+                                 user, name_id, issuer)
             else:
                 user.delete()
                 user = saml_id.user
@@ -92,11 +94,15 @@ class DefaultAdapter(object):
                 self.logger.warning(
                     u'invalid reference in attribute mapping template %r: %s', tpl, e)
             else:
-                attribute_set = True
                 model_field = user._meta.get_field(field)
                 if hasattr(model_field, 'max_length'):
                     value = value[:model_field.max_length]
-                setattr(user, field, value)
+                if getattr(user, field) != value:
+                    old_value = getattr(user, field)
+                    setattr(user, field, value)
+                    attribute_set = True
+                    self.logger.info(u'set field %s of user %s to value %r (old value %r)', field,
+                                     user, value, old_value)
         if attribute_set:
             user.save()
 
@@ -104,6 +110,7 @@ class DefaultAdapter(object):
         superuser_mapping = utils.get_setting(idp, 'SUPERUSER_MAPPING')
         if not superuser_mapping:
             return
+        attribute_set = False
         for key, values in superuser_mapping.iteritems():
             if key in saml_attributes:
                 if not isinstance(values, (tuple, list)):
@@ -114,15 +121,20 @@ class DefaultAdapter(object):
                     attribute_values = [attribute_values]
                 attribute_values = set(attribute_values)
                 if attribute_values & values:
-                    user.is_staff = True
-                    user.is_superuser = True
-                    user.save()
-                    break
+                    if not (user.is_staff and user.is_superuser):
+                        user.is_staff = True
+                        user.is_superuser = True
+                        attribute_set = True
+                        self.logger.info('flag is_staff and is_superuser added to user %s', user)
+                        break
         else:
             if user.is_superuser or user.is_staff:
                 user.is_staff = False
                 user.is_superuser = False
-                user.save()
+                self.logger.info('flag is_staff and is_superuser removed from user %s', user)
+                attribute_set = True
+        if attribute_set:
+            user.save()
 
     def provision_groups(self, user, idp, saml_attributes):
         User = user.__class__

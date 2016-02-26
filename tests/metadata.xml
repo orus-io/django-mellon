@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<ns0:EntityDescriptor xmlns:ns0="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ns1="http://www.w3.org/2000/09/xmldsig#" entityID="https://cresson.entrouvert.org/idp/saml2/metadata"><ns0:IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"><ns0:KeyDescriptor><ns1:KeyInfo><ns1:X509Data><ns1:X509Certificate>MIIC+TCCAeGgAwIBAgIJAJqAKDUDlSinMA0GCSqGSIb3DQEBBQUAMBMxETAPBgNV
+BAMMCHdob2NhcmVzMB4XDTE0MDUyNzE0MzE0OVoXDTI0MDUyNDE0MzE0OVowEzER
+MA8GA1UEAwwId2hvY2FyZXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIB
+AQDrUFQGviUE+unV4afJQiRUPp4/D+Ltvuw59BuJwdNEWHA2vchhnwDLlp3RWKaf
+SWBJift55C4ybQKn5AEe6FHlIapJPvNqYnVP+0IgUFJmrxTWG9IT/5ZvJS0yer/O
+093I5HTqthgcByIAj2L4R3oW21HNCojT4WZDYjG6RAxRFU/10BYY1ILe1SPAMXqc
+99QC5fy2sZEJ/Cyd2Vlt1kAQ1+BZSZCL3vvdLfVRKjKZn2yYp8XbSplAZxB+b/iM
+duSQHtLaRsV5tizPCdftXECaDn1FKqK0JmcolHFBsfOH2x7I8XEljO/DR/Oy4kzv
+/cLdZB5fft4+nCqwLzI7fcRFAgMBAAGjUDBOMB0GA1UdDgQWBBSFV52hDdxJAdbM
+Nht32j7+PyFbKTAfBgNVHSMEGDAWgBSFV52hDdxJAdbMNht32j7+PyFbKTAMBgNV
+HRMEBTADAQH/MA0GCSqGSIb3DQEBBQUAA4IBAQCoNxpm99qip4nROCedBIbZnqWj
+EkqHRLvIsm+oxf4Ctc6x/N1d2ngEygfT1xf5N5V221XTOgLCkuqi5r0/T6EB7U9y
+6ACfVJQmvNaPbFmn2J9rNIAPYPj2cengSZyL3mWyrkPFLj5TsgT98GASX9iThhds
+Nq6btZUL9ZUq8v3O7Y1uruMHJAACim4eYBjsCXaF7diKYaftFiwZWy1+3IQzUhmg
+Ov4KR9P9bb+W/43i7zAYmdUrBr31/amEvGHoco7cO2bp43/1H8fFOcnkX0wRdN/k
+r/hRVIsfeC6ss1NPDu/KzbRVVn5p9qKK6YVqqT3QapnQELgajEfhxpgY7AQx</ns1:X509Certificate></ns1:X509Data></ns1:KeyInfo></ns0:KeyDescriptor><ns0:ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://cresson.entrouvert.org/idp/saml2/artifact" index="0" /><ns0:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://cresson.entrouvert.org/idp/saml2/slo" ResponseLocation="https://cresson.entrouvert.org/idp/saml2/slo_return" /><ns0:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://cresson.entrouvert.org/idp/saml2/slo" ResponseLocation="https://cresson.entrouvert.org/idp/saml2/slo_return" /><ns0:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://cresson.entrouvert.org/idp/saml2/slo/soap" /><ns0:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://cresson.entrouvert.org/idp/saml2/sso" /><ns0:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://cresson.entrouvert.org/idp/saml2/sso" /></ns0:IDPSSODescriptor></ns0:EntityDescriptor>
