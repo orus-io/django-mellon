@@ -26,9 +26,12 @@ class LogMixin(object):
 
 class LoginView(LogMixin, View):
     def get_idp(self, request):
-        entity_id = request.REQUEST.get('entity_id')
+        entity_id = request.REQUEST.get('entityID')
         if not entity_id:
-            return next(utils.get_idps())
+            for idp in utils.get_idps():
+                return idp
+            else:
+                return None
         else:
             return utils.get_idp(entity_id)
 
