@@ -245,7 +245,7 @@ class LoginView(LogMixin, View):
         next_url = request.GET.get('next')
         idp = self.get_idp(request)
         if idp is None:
-            return HttpResponseBadRequest('unkown entity_id')
+            return HttpResponseBadRequest('no idp found')
         login = utils.create_login(request)
         self.log.debug('authenticating to %r', idp['ENTITY_ID'])
         try:
