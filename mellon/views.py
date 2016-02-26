@@ -11,12 +11,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect, resolve_url
 from django.utils.http import urlencode
 
-from . import app_settings
+from . import app_settings, utils
 
 
 lasso.setFlag('thin-sessions')
-
-from . import utils
 
 class LogMixin(object):
     """Initialize a module logger in new objects"""
