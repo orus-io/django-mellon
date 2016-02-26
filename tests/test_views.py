@@ -1,7 +1,12 @@
+import pytest
 import mock
 import lasso
+from urlparse import parse_qs, urlparse
+import base64
 
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ImproperlyConfigured
+from django.utils.http import urlencode
 
 from xml_utils import assert_xml_constraints
 
@@ -108,3 +113,76 @@ def test_metadata(private_settings, client):
           ('[@contactType="technical"]', 1),
           ('[@contactType="administrative"]', 1))),
         namespaces=ns)
+
+
+def test_sp_initiated_login_improperly_configured(private_settings, client):
+    with pytest.raises(ImproperlyConfigured):
+        client.get('/login/')
+
+
+def test_sp_initiated_login_improperly_configured2(private_settings, client):
+    private_settings.MELLON_IDENTITY_PROVIDERS = []
+    response = client.get('/login/')
+    assert response.status_code == 400
+    assert 'no idp found' in response.content
+
+
+def test_sp_initiated_login_discovery_service(private_settings, client):
+    private_settings.MELLON_DISCOVERY_SERVICE_URL = 'https://disco'
+    response = client.get('/login/')
+    assert response.status_code == 302
+    params = parse_qs(urlparse(response['Location']).query)
+    assert response['Location'].startswith('https://disco?')
+    assert params == {'return': ['http://testserver/login/'],
+                      'nodisco': ['1']}
+
+
+def test_sp_initiated_login_discovery_service_passive(private_settings, client):
+    private_settings.MELLON_DISCOVERY_SERVICE_URL = 'https://disco'
+    response = client.get('/login/?passive=1')
+    assert response.status_code == 302
+    params = parse_qs(urlparse(response['Location']).query)
+    assert response['Location'].startswith('https://disco?')
+    assert params == {'isPassive': ['true'],
+                      'return': ['http://testserver/login/'],
+                      'nodisco': ['1']}
+
+
+def test_sp_initiated_login_discovery_service_nodisco(private_settings, client):
+    private_settings.MELLON_IDENTITY_PROVIDERS = []
+    private_settings.MELLON_DISCOVERY_SERVICE_URL = 'https://disco'
+    response = client.get('/login/?nodisco=1')
+    assert response.status_code == 400
+    assert 'no idp found' in response.content
+
+
+def test_sp_initiated_login(private_settings, client):
+    private_settings.MELLON_IDENTITY_PROVIDERS = [{
+        'METADATA': open('tests/metadata.xml').read(),
+    }]
+    response = client.get('/login/?next=%2Fwhatever')
+    assert response.status_code == 302
+    params = parse_qs(urlparse(response['Location']).query)
+    assert response['Location'].startswith('https://cresson.entrouvert.org/idp/saml2/sso?')
+    assert set(params.keys()) == set(['SAMLRequest', 'RelayState'])
+    assert len(params['SAMLRequest']) == 1
+    assert base64.b64decode(params['SAMLRequest'][0])
+    assert params['RelayState'] == ['/whatever']
+
+
+def test_sp_initiated_login_chosen(private_settings, client):
+    private_settings.MELLON_IDENTITY_PROVIDERS = [{
+        'METADATA': open('tests/metadata.xml').read(),
+    }]
+    qs = urlencode({
+        'entityID': 'https://cresson.entrouvert.org/idp/saml2/metadata',
+        'next': '/whatever',
+    })
+    response = client.get('/login/?' + qs)
+    assert response.status_code == 302
+    params = parse_qs(urlparse(response['Location']).query)
+    assert response['Location'].startswith('https://cresson.entrouvert.org/idp/saml2/sso?')
+    assert set(params.keys()) == set(['SAMLRequest', 'RelayState'])
+    assert len(params['SAMLRequest']) == 1
+    assert base64.b64decode(params['SAMLRequest'][0])
+    assert params['RelayState'] == ['/whatever']
