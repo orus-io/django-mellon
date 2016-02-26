@@ -1,5 +1,6 @@
 import logging
 import requests
+import lasso
 from requests.exceptions import RequestException
 
 from django.views.generic import View
@@ -12,7 +13,6 @@ from django.utils.http import same_origin, urlencode
 
 from . import app_settings
 
-import lasso
 
 lasso.setFlag('thin-sessions')
 
