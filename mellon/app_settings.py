@@ -1,5 +1,4 @@
 import sys
-from django.core.exceptions import ImproperlyConfigured
 
 
 class AppSettings(object):
@@ -40,6 +39,7 @@ class AppSettings(object):
         try:
             idps = settings.MELLON_IDENTITY_PROVIDERS
         except AttributeError:
+            from django.core.exceptions import ImproperlyConfigured
             raise ImproperlyConfigured('The MELLON_IDENTITY_PROVIDERS setting is mandatory')
         if isinstance(idps, dict):
             idps = [idps]
