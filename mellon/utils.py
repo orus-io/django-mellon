@@ -36,6 +36,8 @@ def create_metadata(request):
             'public_keys': public_keys,
             'name_id_formats': name_id_formats,
             'default_assertion_consumer_binding': app_settings.DEFAULT_ASSERTION_CONSUMER_BINDING,
+            'organization': app_settings.ORGANIZATION,
+            'contact_persons': app_settings.CONTACT_PERSONS,
         })
         settings._MELLON_METADATA_CACHE = cache
     return settings._MELLON_METADATA_CACHE[entity_id]

@@ -30,6 +30,8 @@ class AppSettings(object):
         'VERIFY_SSL_CERTIFICATE': True,
         'OPENED_SESSION_COOKIE_NAME': None,
         'OPENED_SESSION_COOKIE_DOMAIN': None,
+        'ORGANIZATION': None,
+        'CONTACT_PERSONS': [],
     }
 
     @property

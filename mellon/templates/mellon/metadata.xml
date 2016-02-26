@@ -36,5 +36,51 @@
      Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
      Location="{{ login_url }}" />
  </SPSSODescriptor>
+ {% if organization and organization.NAMES and organization.DISPLAY_NAMES and organization.URLS %}
+     <Organization>
+     {% for name in organization.NAMES %}
+         {% if name.LABEL %}
+             <OrganizationName {% if name.LANG %}xml:lang="{{ name.LANG }}"{% endif %}>{{ name.LABEL }}</OrganizationName>
+         {% else %}
+             <OrganizationName>{{ name }}</OrganizationName>
+         {% endif %}
+     {% endfor %}
+     {% for display_name in organization.DISPLAY_NAMES %}
+         {% if display_name.LABEL %}
+             <OrganizationDisplayName {% if display_name.LANG %}xml:lang="{{ display_name.LANG }}"{% endif %}>{{ display_name.LABEL }}</OrganizationDisplayName>
+         {% else %}
+             <OrganizationDisplayName>{{ display_name }}</OrganizationDisplayName>
+         {% endif %}
+     {% endfor %}
+     {% for url in organization.URLS %}
+         {% if url.URL %}
+             <OrganizationURL {% if url.LANG %}xml:lang="{{ url.LANG }}"{% endif %}>{{ url.URL }}</OrganizationURL>
+         {% else %}
+             <OrganizationURL>{{ url }}</OrganizationURL>
+         {% endif %}
+     {% endfor %}
+    </Organization>
+ {% endif %}
+ {% for contact_person in contact_persons %}
+    {% if contact_person.CONTACT_TYPE %}
+        <ContactPerson contactType="{{ contact_person.CONTACT_TYPE }}">
+            {% if contact_person.COMPANY %}
+                <Company>{{ contact_person.COMPANY }}</Company>
+            {% endif %}
+            {% if contact_person.GIVEN_NAME %}
+                <GivenName>{{ contact_person.GIVEN_NAME }}</GivenName>
+            {% endif %}
+            {% if contact_person.SURNAME %}
+                <SurName>{{ contact_person.SURNAME }}</SurName>
+            {% endif %}
+            {% for email_address in contact_person.EMAIL_ADDRESSES %}
+                <EmailAddress>{{ email_address }}</EmailAddress>
+            {% endfor %}
+            {% for telephone_number in contact_person.TELEPHONE_NUMBERS %}
+                <TelephoneNumber>{{ telephone_number }}</TelephoneNumber>
+            {% endfor %}
+        </ContactPerson>
+    {% endif %}
+ {% endfor %}
 
 </EntityDescriptor>

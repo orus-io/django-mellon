@@ -19,3 +19,16 @@ def concurrency(settings):
         return 20
     else:
         return 100
+
+
+@pytest.fixture
+def private_settings(request):
+    import django.conf
+    from django.conf import UserSettingsHolder
+    old = django.conf.settings._wrapped
+    django.conf.settings._wrapped = UserSettingsHolder(old)
+
+    def finalizer():
+        django.conf.settings._wrapped = old
+    request.addfinalizer(finalizer)
+    return django.conf.settings
