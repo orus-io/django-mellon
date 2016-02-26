@@ -9,7 +9,7 @@ import dateutil.parser
 
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
-from django.utils.timezone import make_aware, now, make_naive, is_aware
+from django.utils.timezone import make_aware, now, make_naive, is_aware, get_default_timezone
 from django.conf import settings
 import lasso
 
@@ -142,10 +142,10 @@ def iso8601_to_datetime(date_string):
     dt = dateutil.parser.parse(date_string)
     if is_aware(dt):
         if not settings.USE_TZ:
-            dt = make_naive(dt)
+            dt = make_naive(dt, get_default_timezone())
     else:
         if settings.USE_TZ:
-            dt = make_aware(dt)
+            dt = make_aware(dt, get_default_timezone())
     return dt
 
 
