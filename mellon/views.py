@@ -8,7 +8,9 @@ from django.contrib import auth
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect, resolve_url
-from django.utils.http import same_origin
+from django.utils.http import same_origin, urlencode
+
+from . import app_settings
 
 import lasso
 
@@ -212,10 +214,31 @@ class LoginView(LogMixin, View):
             return self.sso_success(request, login)
         return self.sso_failure(request, login, idp_message, status_codes)
 
+    def request_discovery_service(self, request, is_passive=False):
+        self_url = request.build_absolute_uri(request.path)
+        url = app_settings.DISCOVERY_SERVICE_URL
+        params = {
+            # prevent redirect loops with the discovery service
+            'nodisco': '1',
+            'return': self_url
+        }
+        if is_passive:
+            params['isPassive'] = 'true'
+        url += '?' + urlencode(params)
+        return HttpResponseRedirect(url)
+
     def get(self, request, *args, **kwargs):
         '''Initialize login request'''
         if 'SAMLart' in request.GET:
             return self.continue_sso_artifact_get(request)
+
+        # redirect to discovery service if needed
+        if (not 'entityID' in request.GET
+            and not 'nodisco' in request.GET
+            and app_settings.DISCOVERY_SERVICE_URL):
+            return self.request_discovery_service(
+                request, is_passive=request.GET.get('passive') == '1')
+
         next_url = request.GET.get('next')
         idp = self.get_idp(request)
         if idp is None:

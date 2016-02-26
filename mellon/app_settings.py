@@ -4,6 +4,7 @@ import sys
 class AppSettings(object):
     __PREFIX = 'MELLON_'
     __DEFAULTS = {
+        'DISCOVERY_SERVICE_URL': None,
         'PUBLIC_KEYS': (),
         'PRIVATE_KEY': None,
         'PRIVATE_KEYS': (),
