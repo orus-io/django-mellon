@@ -1,6 +1,4 @@
 import logging
-import re
-import time
 import datetime
 import importlib
 from functools import wraps
@@ -11,7 +9,7 @@ import dateutil.parser
 
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
-from django.utils.timezone import make_aware, utc, now, make_naive, is_aware
+from django.utils.timezone import make_aware, now, make_naive, is_aware
 from django.conf import settings
 import lasso
 
@@ -44,6 +42,7 @@ def create_metadata(request):
 
 SERVERS = {}
 
+
 def create_server(request):
     logger = logging.getLogger(__name__)
     root = request.build_absolute_uri('/')
@@ -59,7 +58,7 @@ def create_server(request):
             if isinstance(private_key, (tuple, list)):
                 private_key_password = private_key[1]
                 private_key = private_key[0]
-        else: # no signature
+        else:  # no signature
             private_key = None
             private_key_password = None
         server = lasso.Server.newFromBuffers(metadata,
@@ -102,12 +101,14 @@ def create_server(request):
         SERVERS[root] = server
     return SERVERS[root]
 
+
 def create_login(request):
     server = create_server(request)
     login = lasso.Login(server)
     if not app_settings.PRIVATE_KEY and not app_settings.PRIVATE_KEYS:
         login.setSignatureHint(lasso.PROFILE_SIGNATURE_HINT_FORBID)
     return login
+
 
 def get_idp(entity_id):
     for adapter in get_adapters():
@@ -117,11 +118,13 @@ def get_idp(entity_id):
                 return idp
     return {}
 
+
 def get_idps():
     for adapter in get_adapters():
         if hasattr(adapter, 'get_idps'):
             for idp in adapter.get_idps():
                 yield idp
+
 
 def flatten_datetime(d):
     d = d.copy()
@@ -129,6 +132,7 @@ def flatten_datetime(d):
         if isinstance(value, datetime.datetime):
             d[key] = value.isoformat() + 'Z'
     return d
+
 
 def iso8601_to_datetime(date_string):
     '''Convert a string formatted as an ISO8601 date into a time_t
@@ -144,8 +148,10 @@ def iso8601_to_datetime(date_string):
             dt = make_aware(dt)
     return dt
 
+
 def get_seconds_expiry(datetime_expiry):
     return (datetime_expiry - now()).total_seconds()
+
 
 def to_list(func):
     @wraps(func)
@@ -153,10 +159,12 @@ def to_list(func):
         return list(func(*args, **kwargs))
     return f
 
+
 def import_object(path):
     module, name = path.rsplit('.', 1)
     module = importlib.import_module(module)
     return getattr(module, name)
+
 
 @to_list
 def get_adapters(idp={}):
@@ -164,6 +172,7 @@ def get_adapters(idp={}):
     adapters = tuple(idp.get('ADAPTER', ())) + tuple(app_settings.ADAPTER)
     for adapter in adapters:
         yield import_object(adapter)()
+
 
 def get_values(saml_attributes, name):
     values = saml_attributes.get(name)
@@ -173,11 +182,13 @@ def get_values(saml_attributes, name):
         return (values,)
     return values
 
+
 def get_setting(idp, name, default=None):
     '''Get a parameter from an IdP specific configuration or from the main
        settings.
     '''
     return idp.get(name) or getattr(app_settings, name, default)
+
 
 def create_logout(request):
     logger = logging.getLogger(__name__)
@@ -190,12 +201,12 @@ def create_logout(request):
     name_id_name_qualifier = mellon_session.get('name_id_name_qualifier')
     name_id_sp_name_qualifier = mellon_session.get('name_id_sp_name_qualifier')
     session_dump = render_to_string('mellon/session_dump.xml', {
-            'entity_id': entity_id,
-            'session_index': session_index,
-            'name_id_format': name_id_format,
-            'name_id_content': name_id_content,
-            'name_id_name_qualifier': name_id_name_qualifier,
-            'name_id_sp_name_qualifier': name_id_sp_name_qualifier,
+        'entity_id': entity_id,
+        'session_index': session_index,
+        'name_id_format': name_id_format,
+        'name_id_content': name_id_content,
+        'name_id_name_qualifier': name_id_name_qualifier,
+        'name_id_sp_name_qualifier': name_id_sp_name_qualifier,
     })
     logger.debug('session_dump %s', session_dump)
     logout = lasso.Logout(server)
@@ -203,6 +214,7 @@ def create_logout(request):
         logout.setSignatureHint(lasso.PROFILE_SIGNATURE_HINT_FORBID)
     logout.setSessionFromDump(session_dump)
     return logout
+
 
 def is_nonnull(s):
     return not '\x00' in s
