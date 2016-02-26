@@ -130,7 +130,7 @@ def flatten_datetime(d):
     d = d.copy()
     for key, value in d.iteritems():
         if isinstance(value, datetime.datetime):
-            d[key] = value.isoformat() + 'Z'
+            d[key] = value.isoformat()
     return d
 
 
