@@ -55,7 +55,7 @@ def test_lookup_user(settings):
 
 def test_lookup_user_transaction(transactional_db, concurrency):
     adapter = DefaultAdapter()
-    N = 30
+
     def map_threads(f, l):
         threads = []
         for i in l:
