@@ -1,5 +1,10 @@
 import logging
 import uuid
+from xml.etree import ElementTree as ET
+
+import lasso
+import requests
+import requests.exceptions
 
 from django.core.exceptions import PermissionDenied
 from django.contrib import auth
@@ -14,12 +19,49 @@ class DefaultAdapter(object):
 
     def get_idp(self, entity_id):
         '''Find the first IdP definition matching entity_id'''
-        for idp in app_settings.IDENTITY_PROVIDERS:
+        for idp in self.get_idps():
             if entity_id == idp['ENTITY_ID']:
                 return idp
 
+    def get_identity_providers_setting(self):
+        return app_settings.IDENTITY_PROVIDERS
+
     def get_idps(self):
-        return [idp for idp in app_settings.IDENTITY_PROVIDERS]
+        for i, idp in enumerate(self.get_identity_providers_setting()):
+            if 'METADATA_URL' in idp and 'METADATA' not in idp:
+                verify_ssl_certificate = utils.get_setting(
+                    idp, 'VERIFY_SSL_CERTIFICATE')
+                try:
+                    response = requests.get(idp['METADATA_URL'], verify=verify_ssl_certificate)
+                    response.raise_for_status()
+                except requests.exceptions.RequestException, e:
+                    self.logger.error(
+                        u'retrieval of metadata URL %r failed with error %s for %d-th idp',
+                        idp['METADATA_URL'], e, i)
+                    continue
+                idp['METADATA'] = response.content
+            elif 'METADATA' in idp:
+                if idp['METADATA'].startswith('/'):
+                    idp['METADATA'] = file(idp['METADATA']).read()
+            else:
+                self.logger.error(u'missing METADATA or METADATA_URL in %d-th idp', i)
+                continue
+            if 'ENTITY_ID' not in idp:
+                try:
+                    doc = ET.fromstring(idp['METADATA'])
+                except (TypeError, ET.ParseError):
+                    self.logger.error(u'METADATA of %d-th idp is invalid', i)
+                    continue
+                if doc.tag != '{%s}EntityDescriptor' % lasso.SAML2_METADATA_HREF:
+                    self.logger.error(u'METADATA of %d-th idp has no EntityDescriptor root tag', i)
+                    continue
+
+                if not 'entityID' in doc.attrib:
+                    self.logger.error(
+                        u'METADATA of %d-th idp has no entityID attribute on its root tag', i)
+                    continue
+                idp['ENTITY_ID'] = doc.attrib['entityID']
+            yield idp
 
     def authorize(self, idp, saml_attributes):
         if not idp:

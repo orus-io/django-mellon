@@ -2,9 +2,6 @@ import logging
 import datetime
 import importlib
 from functools import wraps
-from xml.etree import ElementTree as ET
-import requests
-import requests.exceptions
 import dateutil.parser
 
 from django.core.urlresolvers import reverse
@@ -48,8 +45,8 @@ SERVERS = {}
 def create_server(request):
     logger = logging.getLogger(__name__)
     root = request.build_absolute_uri('/')
-    if root not in SERVERS:
-        idps = get_idps()
+    cache = getattr(settings, '_MELLON_SERVER_CACHE', {})
+    if root not in cache:
         metadata = create_metadata(request)
         if app_settings.PRIVATE_KEY:
             private_key = app_settings.PRIVATE_KEY
@@ -63,9 +60,8 @@ def create_server(request):
         else:  # no signature
             private_key = None
             private_key_password = None
-        server = lasso.Server.newFromBuffers(metadata,
-                private_key_content=private_key,
-                private_key_password=private_key_password)
+        server = lasso.Server.newFromBuffers(metadata, private_key_content=private_key,
+                                             private_key_password=private_key_password)
         server.setEncryptionPrivateKeyWithPassword(private_key, private_key_password)
         for key in app_settings.PRIVATE_KEYS:
             password = None
@@ -73,35 +69,16 @@ def create_server(request):
                 password = key[1]
                 key = key[0]
             server.setEncryptionPrivateKeyWithPassword(key, password)
-        for i, idp in enumerate(idps):
-            if 'METADATA_URL' in idp and 'METADATA' not in idp:
-                verify_ssl_certificate = get_setting(
-                    idp, 'VERIFY_SSL_CERTIFICATE')
-                try:
-                    response = requests.get(idp['METADATA_URL'],
-                                        verify=verify_ssl_certificate)
-                    response.raise_for_status()
-                except requests.exceptions.RequestException, e:
-                    logger.error(u'retrieval of metadata URL %r failed with error %s for %d-th idp',
-                                 idp['METADATA_URL'], e, i)
-                    continue
-                metadata = response.content
-            elif 'METADATA' in idp:
-                if idp['METADATA'].startswith('/'):
-                    metadata = file(idp['METADATA']).read()
-            else:
-                logger.error(u'missing METADATA or METADATA_URL in %d-th idp', i)
-                continue
+        for idp in get_idps():
             try:
-                server.addProviderFromBuffer(lasso.PROVIDER_ROLE_IDP, metadata)
+                server.addProviderFromBuffer(lasso.PROVIDER_ROLE_IDP, idp['METADATA'])
             except lasso.Error, e:
-                logger.error(u'bad metadata in %d-th idp', i)
+                logger.error(u'bad metadata in idp %r', idp['ENTITY_ID'])
                 logger.debug(u'lasso error: %s', e)
                 continue
-            idp['ENTITY_ID'] = ET.fromstring(metadata).attrib['entityID']
-            idp['METADATA'] = metadata
-        SERVERS[root] = server
-    return SERVERS[root]
+        cache[root] = server
+        settings._MELLON_SERVER_CACHE = cache
+    return settings._MELLON_SERVER_CACHE.get(root)
 
 
 def create_login(request):
