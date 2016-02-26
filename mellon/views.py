@@ -34,9 +34,12 @@ class LoginView(LogMixin, View):
         '''Assertion consumer'''
         if 'SAMLResponse' not in request.POST:
             return self.get(request, *args, **kwargs)
+        if not utils.is_nonnull(request.POST['SAMLResponse']):
+            return HttpResponseBadRequest('SAMLResponse contains a null character')
         login = utils.create_login(request)
         idp_message = None
         status_codes = []
+        # prevent null characters in SAMLResponse
         try:
             login.processAuthnResponseMsg(request.POST['SAMLResponse'])
             login.acceptSso()
@@ -63,7 +66,7 @@ class LoginView(LogMixin, View):
             return HttpResponseBadRequest('error processing the authentication '
                     'response: %r' % e)
         else:
-            if 'RelayState' in request.POST:
+            if 'RelayState' in request.POST and utils.is_nonnull(request.POST['RelayState']):
                 login.msgRelayState = request.POST['RelayState']
             return self.sso_success(request, login)
         return self.sso_failure(request, login, idp_message, status_codes)
@@ -204,7 +207,7 @@ class LoginView(LogMixin, View):
             return HttpResponseBadRequest('error processing the authentication '
                     'response: %r' % e)
         else:
-            if 'RelayState' in request.GET:
+            if 'RelayState' in request.GET and utils.is_nonnull(request.GET['RelayState']):
                 login.msgRelayState = request.GET['RelayState']
             return self.sso_success(request, login)
         return self.sso_failure(request, login, idp_message, status_codes)
@@ -238,7 +241,7 @@ class LoginView(LogMixin, View):
                 req_authncontext = lasso.RequestedAuthnContext()
                 authn_request.requestedAuthnContext = req_authncontext
                 req_authncontext.authnContextClassRef = authn_classref
-            if next_url:
+            if next_url and utils.is_nonnull(next_url):
                 login.msgRelayState = next_url
             login.buildAuthnRequestMsg()
         except lasso.Error, e:
@@ -300,7 +303,8 @@ class LogoutView(LogMixin, View):
                             else:
                                 self.log.error('unable to find lasso session dump')
                             logout.initRequest(issuer, lasso.HTTP_METHOD_REDIRECT)
-                            logout.msgRelayState = next_url
+                            if utils.is_nonnull(next_url):
+                                logout.msgRelayState = next_url
                             logout.buildRequestMsg()
                         except lasso.Error, e:
                             self.log.error('unable to initiate a logout request %r', e)

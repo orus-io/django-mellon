@@ -1,4 +1,13 @@
 import pytest
+import django_webtest
+
+
+@pytest.fixture
+def app(request):
+    wtm = django_webtest.WebTestMixin()
+    wtm._patch_settings()
+    request.addfinalizer(wtm._unpatch_settings)
+    return django_webtest.DjangoTestApp()
 
 
 @pytest.fixture

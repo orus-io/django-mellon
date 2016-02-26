@@ -202,3 +202,6 @@ def create_logout(request):
         logout.setSignatureHint(lasso.PROFILE_SIGNATURE_HINT_FORBID)
     logout.setSessionFromDump(session_dump)
     return logout
+
+def is_nonnull(s):
+    return not '\x00' in s
