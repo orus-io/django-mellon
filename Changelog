@@ -1,8 +1,78 @@
-1.2.x
+1.2.23
+------
+
+- silence Django 1.10 deprecration warnings
+- adapters: factorize user creation in lookup_user() (fixes #10164)
+- trivial: move utils import
+- django 1.9 adaptations
+- tests: add test on SP initiated login
+- views: change HTTP 400 message when no idp is found
+- trivial: move lasso import
+- tests: add tests on mellon.utils
+- views: do not traceback in get_idp() when no idp is declared
+- tests: remove unused variable
+- add discovery service support (fixes #10111)
+- move idp settings building in adapters
+- adapters: improve logging during provisionning
+- templates: fix default_assertion_consumer_binding check, use of = instead of ==
+- app_settings: fix import of ImproperlyConfigured exception
+- add support for Organization and ContactPerson elements in metadata (fixes #6656)
+- templates: fix public key representation in metadata
+- tests: add helper to check XML documents
+- utils: fix iso8601_to_datetime, make_naive amd make_aware need a timezone parameter
+- utils: fix flatten_datetime, isoformat() already add a timezone if needed
+- store cached metadata in settings
+- do not pass strings contening null characters to Lasso, return 400 or ignore (fixes #8939)
+- add tox.ini to test on django 1.7, 1.8, 1.9 and with sqlite and pg
+- report lasso error at debug level
+- log errors when loading IdP metadata instead of throwing a traceback (fixes #9745)
+- fix concurrency error when creating new users (fixes #9965)
+
+1.2.22
+------
+
+- reset is_staff when superuser mapping fails (fixes #9736)
+- implement session_not_on_or_after using new session engines (fixes #9640)
+- use dateutil to parse datetime strings (#9640)
+- utils: return naive datetime if USE_TZ=False (fixes #9521)
+
+1.2.21
+------
+
+- setup.py: hide DJANGO_SETTINGS_MODULE value when calling compilemessages
+- do not flatten attributes inplace, and convert expiry to seconds (fixes #9359)
+- adapters: prevent collision in provision_groups() (fixes #9327)
+
+1.2.20
+------
+
+- middleware: handle process_view (#9131)
+
+1.2.19
+------
+
+- middleware: do not apply autologin to mellon views (fixes #9131)
+
+1.2.18
+------
+
+- middleware: disallow passive authentication when no IdP is found (fixes #8123)
+- Revert "views: add an iframe mode to the login view"
+- add PassiveAuthenticationMiddleware using a common domain cookie (fixes #8123)
+- views: add an iframe mode to the login view
+
+1.2.17
 -----
 
+- truncate attribute when setting user fields
+- handle status is not success errors
+- use requests for HTTP retrieval of metadata
+- use lasso thin-sessions
 - add setting MELLON_VERIFY_SSL_CERTIFICATE
 - improve logs in SAML artifact error paths
+- improve logout logs
+- handle artifact response as a byte string
+- do not store a name_id_name_qualifier or name_id_sp_name_qualifier when they are absent
 
 1.2.16
 ------
@@ -74,5 +144,4 @@
 -----
 
 - bug fixed on Lasso session data generation
-- AuthnRequest now contain the AllowCreate flag
-
+- AuthnRequest now contains the AllowCreate flag
