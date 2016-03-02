@@ -1,4 +1,5 @@
 import os
+import django
 from django.conf import global_settings
 
 DATABASES = {
@@ -23,3 +24,10 @@ AUTHENTICATION_BACKENDS = (
     'mellon.backends.SAMLBackend',
 )
 ROOT_URLCONF = 'mellon.urls'
+if django.VERSION >= (1,8):
+    TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'APP_DIRS': True,
+        },
+    ]
