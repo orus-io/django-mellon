@@ -13,6 +13,10 @@ from django.contrib.auth.models import Group
 from . import utils, app_settings, models
 
 
+class UserCreationError(Exception):
+    pass
+
+
 class DefaultAdapter(object):
     def __init__(self, *args, **kwargs):
         self.logger = logging.getLogger(__name__)
@@ -90,6 +94,17 @@ class DefaultAdapter(object):
         else:
             return username
 
+    def create_user(self, user_class):
+        return user_class.objects.create(username=uuid.uuid4().hex[:30])
+
+    def finish_create_user(self, idp, saml_attributes, user):
+        username = self.format_username(idp, saml_attributes)
+        if not username:
+            self.logger.warning('could not build a username, login refused')
+            raise UserCreationError
+        user.username = username
+        user.save()
+
     def lookup_user(self, idp, saml_attributes):
         User = auth.get_user_model()
         name_id = saml_attributes['name_id_content']
@@ -101,16 +116,15 @@ class DefaultAdapter(object):
             if not utils.get_setting(idp, 'PROVISION'):
                 self.logger.warning('provisionning disabled, login refused')
                 return None
-            username = self.format_username(idp, saml_attributes)
-            if not username:
-                self.logger.warning('could not build a username, login refused')
-                return None
-            user = User.objects.create(username=uuid.uuid4().hex[:30])
+            user = self.create_user(User)
             saml_id, created = models.UserSAMLIdentifier.objects.get_or_create(
                 name_id=name_id, issuer=issuer, defaults={'user': user})
             if created:
-                user.username = username
-                user.save()
+                try:
+                    self.finish_create_user(idp, saml_attributes, user)
+                except UserCreationError:
+                    user.delete()
+                    return None
                 self.logger.info('created new user %s with name_id %s from issuer %s',
                                  user, name_id, issuer)
             else:
