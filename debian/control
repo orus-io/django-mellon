@@ -13,5 +13,6 @@ Depends: ${misc:Depends},
     python (>= 2.7),
     python-django (>= 1.5),
     python-lasso
+Breaks: python-hobo (<< 0.34.5)
 Description: SAML authentication for Django
 
