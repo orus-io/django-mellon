@@ -84,7 +84,7 @@ def test_metadata(private_settings, client):
         ('/sm:EntityDescriptor[@entityID="http://testserver/metadata/"]', 1,
          ('/*', 4),
          ('/sm:SPSSODescriptor', 1,
-          ('/*', 6),
+          ('/*', 7),
           ('/sm:NameIDFormat', 1),
           ('/sm:SingleLogoutService', 1),
           ('/sm:AssertionConsumerService', None,
