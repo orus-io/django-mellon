@@ -121,7 +121,12 @@ def test_provision_is_superuser(settings, django_user_model, caplog):
     }
     user = SAMLBackend().authenticate(saml_attributes=saml_attributes)
     assert user.is_superuser is True
+    assert user.is_staff is True
     assert 'flag is_staff and is_superuser added' in caplog.text()
+    user = SAMLBackend().authenticate(saml_attributes=saml_attributes)
+    assert user.is_superuser is True
+    assert user.is_staff is True
+    assert not 'flag is_staff and is_superuser removed' in caplog.text()
 
 
 def test_provision_absent_attribute(settings, django_user_model, caplog):

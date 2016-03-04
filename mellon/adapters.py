@@ -182,7 +182,7 @@ class DefaultAdapter(object):
                         user.is_superuser = True
                         attribute_set = True
                         self.logger.info('flag is_staff and is_superuser added to user %s', user)
-                        break
+                    break
         else:
             if user.is_superuser or user.is_staff:
                 user.is_staff = False
