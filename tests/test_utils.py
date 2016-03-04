@@ -131,6 +131,7 @@ def test_create_metadata(rf, private_settings, caplog):
     ns = {
         'sm': 'urn:oasis:names:tc:SAML:2.0:metadata',
         'ds': 'http://www.w3.org/2000/09/xmldsig#',
+        'idpdisc': 'urn:oasis:names:tc:SAML:profiles:SSO:idp-discovery-protocol',
     }
     private_settings.MELLON_PUBLIC_KEYS = ['xxx', '/yyy']
     private_settings.MELLON_NAME_ID_FORMATS = [lasso.SAML2_NAME_IDENTIFIER_FORMAT_UNSPECIFIED]
@@ -143,7 +144,9 @@ def test_create_metadata(rf, private_settings, caplog):
         ('/sm:EntityDescriptor[@entityID="http://testserver/metadata/"]', 1,
          ('/*', 1),
          ('/sm:SPSSODescriptor', 1,
-          ('/*', 6),
+          ('/*', 7),
+          ('/sm:Extensions', 1,
+           ('/idpdisc:DiscoveryResponse', 1)),
           ('/sm:NameIDFormat', 1),
           ('/sm:SingleLogoutService', 1),
           ('/sm:AssertionConsumerService[@isDefault=\'true\'][@Binding=\'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact\']', 1),
