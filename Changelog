@@ -1,3 +1,9 @@
+1.2.24
+------
+
+- fix bug in DefaultAdapter.provision_superuser when user has already
+  is_superuser and is_staff set to True
+
 1.2.23
 ------
 
