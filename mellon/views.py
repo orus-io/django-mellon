@@ -262,9 +262,9 @@ class LoginView(LogMixin, View):
             # configure requested AuthnClassRef
             authn_classref = utils.get_setting(idp, 'AUTHN_CLASSREF')
             if authn_classref:
-                req_authncontext = lasso.RequestedAuthnContext()
+                req_authncontext = lasso.Samlp2RequestedAuthnContext()
                 authn_request.requestedAuthnContext = req_authncontext
-                req_authncontext.authnContextClassRef = authn_classref
+                req_authncontext.authnContextClassRef = tuple(authn_classref)
             if next_url and utils.is_nonnull(next_url):
                 login.msgRelayState = next_url
             login.buildAuthnRequestMsg()

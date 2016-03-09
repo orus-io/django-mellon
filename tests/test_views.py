@@ -186,3 +186,22 @@ def test_sp_initiated_login_chosen(private_settings, client):
     assert len(params['SAMLRequest']) == 1
     assert base64.b64decode(params['SAMLRequest'][0])
     assert params['RelayState'] == ['/whatever']
+
+
+def test_sp_initiated_login_requested_authn_context(private_settings, client):
+    private_settings.MELLON_IDENTITY_PROVIDERS = [{
+        'METADATA': open('tests/metadata.xml').read(),
+        'AUTHN_CLASSREF': ['urn:be:fedict:iam:fas:citizen:eid',
+                           'urn:be:fedict:iam:fas:citizen:token'],
+    }]
+    response = client.get('/login/')
+    assert response.status_code == 302
+    params = parse_qs(urlparse(response['Location']).query)
+    assert response['Location'].startswith('https://cresson.entrouvert.org/idp/saml2/sso?')
+    assert params.keys() == ['SAMLRequest']
+    assert len(params['SAMLRequest']) == 1
+    assert base64.b64decode(params['SAMLRequest'][0])
+    request = lasso.Samlp2AuthnRequest()
+    assert request.initFromQuery(urlparse(response['Location']).query)
+    assert request.requestedAuthnContext.authnContextClassRef == (
+            'urn:be:fedict:iam:fas:citizen:eid', 'urn:be:fedict:iam:fas:citizen:token')
