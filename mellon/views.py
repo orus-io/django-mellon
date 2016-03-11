@@ -191,6 +191,13 @@ class LoginView(LogMixin, View):
         try:
             login.processResponseMsg(result.content)
             login.acceptSso()
+        except lasso.ProfileInvalidMsgError:
+            self.log.warning('ArtifactResolveResponse is malformed %r' % result.content[:200])
+            if settings.DEBUG:
+                return HttpResponseBadRequest('ArtififactResolveResponse is malformed\n%r' %
+                                              result.content)
+            else:
+                return HttpResponseBadRequest('ArtififactResolveResponse is malformed')
         except lasso.ProfileCannotVerifySignatureError:
             self.log.warning('SAML authentication failed: signature validation failed for %r',
                     login.remoteProviderId)

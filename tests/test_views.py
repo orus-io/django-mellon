@@ -3,6 +3,9 @@ import mock
 import lasso
 from urlparse import parse_qs, urlparse
 import base64
+import random
+import hashlib
+from httmock import HTTMock
 
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ImproperlyConfigured
@@ -10,6 +13,7 @@ from django.utils.http import urlencode
 
 from xml_utils import assert_xml_constraints
 
+from utils import error_500, html_response
 
 def test_null_character_on_samlresponse_post(app):
     app.post(reverse('mellon_login'), {'SAMLResponse': '\x00'}, status=400)
@@ -214,3 +218,28 @@ def test_malfortmed_artifact(private_settings, client, caplog):
     response = client.get('/login/?SAMLart=xxx', status=400)
     assert 'artifact is malformed' in response.content
     assert 'artifact is malformed' in caplog.text()
+
+
+@pytest.fixture
+def artifact():
+    entity_id = 'https://cresson.entrouvert.org/idp/saml2/metadata'
+    token = 'x' * 20
+    return  base64.b64encode('\x00\x04\x00\x00' + hashlib.sha1(entity_id).digest() + token)
+
+
+def test_error_500_on_artifact_resolve(private_settings, client, caplog, artifact):
+    private_settings.MELLON_IDENTITY_PROVIDERS = [{
+        'METADATA': open('tests/metadata.xml').read(),
+    }]
+    with HTTMock(error_500):
+        response = client.get('/login/?SAMLart=%s' % artifact)
+    assert 'IdP returned 500' in caplog.text()
+
+
+def test_invalid_msg_on_artifact_resolve(private_settings, client, caplog, artifact):
+    private_settings.MELLON_IDENTITY_PROVIDERS = [{
+        'METADATA': open('tests/metadata.xml').read(),
+    }]
+    with HTTMock(html_response):
+        response = client.get('/login/?SAMLart=%s' % artifact)
+    assert 'ArtifactResolveResponse is malformed' in caplog.text()
