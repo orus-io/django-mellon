@@ -24,6 +24,9 @@ AUTHENTICATION_BACKENDS = (
     'mellon.backends.SAMLBackend',
 )
 ROOT_URLCONF = 'mellon.urls'
+TEMPLATE_DIRS = [
+    'tests/templates/',
+]
 if django.VERSION >= (1,8):
     TEMPLATES = [
         {
