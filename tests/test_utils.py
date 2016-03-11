@@ -3,17 +3,14 @@ import datetime
 
 import mock
 import lasso
-from httmock import all_requests, response, HTTMock
 import requests.exceptions
+from httmock import HTTMock
 
 from mellon.utils import create_server, create_metadata, iso8601_to_datetime, flatten_datetime
 import mellon.utils
 from xml_utils import assert_xml_constraints
 
-
-@all_requests
-def error_500(url, request):
-    return response(500, reason='Internal Server Error', request=request)
+from utils import error_500, metadata_response
 
 
 def test_create_server_connection_error(mocker, rf, private_settings, caplog):
@@ -116,12 +113,9 @@ def test_create_server_good_metadata_url(mocker, rf, private_settings, caplog):
         }
     ]
 
-    @all_requests
-    def metadata(url, request):
-        return response(200, content=file('tests/metadata.xml').read())
     request = rf.get('/')
     assert not 'failed with error' in caplog.text()
-    with HTTMock(metadata):
+    with HTTMock(metadata_response):
         server = create_server(request)
     assert 'ERROR' not in caplog.text()
     assert len(server.providers) == 1
