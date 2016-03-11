@@ -205,3 +205,12 @@ def test_sp_initiated_login_requested_authn_context(private_settings, client):
     assert request.initFromQuery(urlparse(response['Location']).query)
     assert request.requestedAuthnContext.authnContextClassRef == (
             'urn:be:fedict:iam:fas:citizen:eid', 'urn:be:fedict:iam:fas:citizen:token')
+
+
+def test_malfortmed_artifact(private_settings, client, caplog):
+    private_settings.MELLON_IDENTITY_PROVIDERS = [{
+        'METADATA': open('tests/metadata.xml').read(),
+    }]
+    response = client.get('/login/?SAMLart=xxx', status=400)
+    assert 'artifact is malformed' in response.content
+    assert 'artifact is malformed' in caplog.text()

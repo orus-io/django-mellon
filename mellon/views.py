@@ -159,6 +159,9 @@ class LoginView(LogMixin, View):
         login = utils.create_login(request)
         try:
             login.initRequest(request.META['QUERY_STRING'], lasso.HTTP_METHOD_ARTIFACT_GET)
+        except lasso.ProfileInvalidArtifactError:
+            self.log.warning(u'artifact is malformed %r', request.GET['SAMLart'])
+            return HttpResponseBadRequest(u'artifact is malformed %r' % request.GET['SAMLart'])
         except lasso.ServerProviderNotFoundError:
             self.log.warning('no entity id found for artifact %s',
                              request.GET['SAMLart'])
