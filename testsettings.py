@@ -32,5 +32,6 @@ if django.VERSION >= (1,8):
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
             'APP_DIRS': True,
+            'DIRS': TEMPLATE_DIRS,
         },
     ]
