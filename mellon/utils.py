@@ -206,6 +206,8 @@ def same_origin(url1, url2):
     Checks if two URLs are 'same-origin'
     """
     p1, p2 = urlparse(url1), urlparse(url2)
+    if url1.startswith('/') or url2.startswith('/'):
+        return True
     try:
         return (p1.scheme, p1.hostname, p1.port) == (p2.scheme, p2.hostname, p2.port)
     except ValueError:
