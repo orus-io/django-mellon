@@ -1,6 +1,7 @@
 import logging
 import requests
 import lasso
+import uuid
 from requests.exceptions import RequestException
 
 from django.views.generic import View
@@ -8,13 +9,15 @@ from django.http import HttpResponseBadRequest, HttpResponseRedirect, HttpRespon
 from django.contrib import auth
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render, redirect, resolve_url
+from django.shortcuts import render, resolve_url
 from django.utils.http import urlencode
+from django.contrib.auth import REDIRECT_FIELD_NAME
 
 from . import app_settings, utils
 
 
 lasso.setFlag('thin-sessions')
+
 
 class LogMixin(object):
     """Initialize a module logger in new objects"""
@@ -22,7 +25,54 @@ class LogMixin(object):
         self.log = logging.getLogger(__name__)
         super(LogMixin, self).__init__(*args, **kwargs)
 
-class LoginView(LogMixin, View):
+
+class ProfileMixin(object):
+    profile = None
+
+    def set_next_url(self, next_url):
+        if not next_url:
+            return
+        if not utils.is_nonnull(next_url):
+            self.log.warning('next parameter ignored, as it contains null characters')
+            return
+        try:
+            next_url.encode('ascii')
+        except UnicodeDecodeError:
+            self.log.warning('next parameter ignored, as is\'s not an ASCII string')
+            return
+        if not utils.same_origin(next_url, self.request.build_absolute_uri()):
+            self.log.warning('next parameter ignored as it is not of the same origin')
+            return
+        self.set_state('next_url', next_url)
+
+    def set_state(self, name, value):
+        assert self.profile
+        relay_state = self.get_relay_state(create=True)
+        self.request.session['mellon_%s_%s' % (name, relay_state)] = value
+
+    def get_state(self, name, default=None):
+        if self.profile:
+            relay_state = self.get_relay_state()
+            key = 'mellon_%s_%s' % (name, relay_state)
+            return self.request.session.get(key, default)
+        return default
+
+    def get_relay_state(self, create=False):
+        if self.profile and self.profile.msgRelayState:
+            try:
+                return uuid.UUID(self.profile.msgRelayState)
+            except ValueError:
+                pass
+        if create:
+            assert self.profile
+            self.profile.msgRelayState = str(uuid.uuid4())
+            return self.profile.msgRelayState
+
+    def get_next_url(self, default=None):
+        return self.get_state('next_url', default=default)
+
+
+class LoginView(ProfileMixin, LogMixin, View):
     def get_idp(self, request):
         entity_id = request.POST.get('entityID') or request.GET.get('entityID')
         if not entity_id:
@@ -39,7 +89,7 @@ class LoginView(LogMixin, View):
             return self.get(request, *args, **kwargs)
         if not utils.is_nonnull(request.POST['SAMLResponse']):
             return HttpResponseBadRequest('SAMLResponse contains a null character')
-        login = utils.create_login(request)
+        self.profile = login = utils.create_login(request)
         idp_message = None
         status_codes = []
         # prevent null characters in SAMLResponse
@@ -132,6 +182,7 @@ class LoginView(LogMixin, View):
 
     def authenticate(self, request, login, attributes):
         user = auth.authenticate(saml_attributes=attributes)
+        next_url = self.get_next_url(default=resolve_url(settings.LOGIN_REDIRECT_URL))
         if user is not None:
             if user.is_active:
                 auth.login(request, user)
@@ -149,14 +200,14 @@ class LoginView(LogMixin, View):
             return render(request, 'mellon/user_not_found.html', {
                 'saml_attributes': attributes })
         request.session['lasso_session_dump'] = login.session.dump()
-        next_url = login.msgRelayState or resolve_url(settings.LOGIN_REDIRECT_URL)
+
         return HttpResponseRedirect(next_url)
 
     def continue_sso_artifact_get(self, request):
         idp_message = None
         status_codes = []
 
-        login = utils.create_login(request)
+        self.profile = login = utils.create_login(request)
         try:
             login.initRequest(request.META['QUERY_STRING'], lasso.HTTP_METHOD_ARTIFACT_GET)
         except lasso.ProfileInvalidArtifactError:
@@ -250,11 +301,11 @@ class LoginView(LogMixin, View):
             return self.request_discovery_service(
                 request, is_passive=request.GET.get('passive') == '1')
 
-        next_url = request.GET.get('next')
+        next_url = request.GET.get(REDIRECT_FIELD_NAME)
         idp = self.get_idp(request)
         if idp is None:
             return HttpResponseBadRequest('no idp found')
-        login = utils.create_login(request)
+        self.profile = login = utils.create_login(request)
         self.log.debug('authenticating to %r', idp['ENTITY_ID'])
         try:
             login.initAuthnRequest(idp['ENTITY_ID'],
@@ -275,8 +326,7 @@ class LoginView(LogMixin, View):
                 req_authncontext = lasso.Samlp2RequestedAuthnContext()
                 authn_request.requestedAuthnContext = req_authncontext
                 req_authncontext.authnContextClassRef = tuple(authn_classref)
-            if next_url and utils.is_nonnull(next_url):
-                login.msgRelayState = next_url
+            self.set_next_url(next_url)
             login.buildAuthnRequestMsg()
         except lasso.Error, e:
             return HttpResponseBadRequest('error initializing the '
@@ -287,7 +337,7 @@ class LoginView(LogMixin, View):
 
 login = csrf_exempt(LoginView.as_view())
 
-class LogoutView(LogMixin, View):
+class LogoutView(ProfileMixin, LogMixin, View):
     def get(self, request):
         if 'SAMLRequest' in request.GET:
             return self.idp_logout(request)
@@ -298,7 +348,7 @@ class LogoutView(LogMixin, View):
 
     def idp_logout(self, request):
         '''Handle logout request emitted by the IdP'''
-        logout = utils.create_logout(request)
+        self.profile = logout = utils.create_logout(request)
         try:
             logout.processRequestMsg(request.META['QUERY_STRING'])
         except lasso.Error, e:
@@ -320,15 +370,15 @@ class LogoutView(LogMixin, View):
 
     def sp_logout_request(self, request):
         '''Launch a logout request to the identity provider'''
-        next_url = resolve_url(settings.LOGIN_REDIRECT_URL)
-        next_url = request.GET.get('next') or next_url
+        next_url = request.GET.get(REDIRECT_FIELD_NAME)
         referer = request.META.get('HTTP_REFERER')
         if not referer or utils.same_origin(referer, request.build_absolute_uri()):
             if request.user.is_authenticated():
+                logout = None
                 try:
                     issuer = request.session.get('mellon_session', {}).get('issuer')
                     if issuer:
-                        logout = utils.create_logout(request)
+                        self.profile = logout = utils.create_logout(request)
                         try:
                             if request.session.has_key('lasso_session_dump'):
                                 logout.setSessionFromDump(
@@ -337,8 +387,6 @@ class LogoutView(LogMixin, View):
                             else:
                                 self.log.error('unable to find lasso session dump')
                             logout.initRequest(issuer, lasso.HTTP_METHOD_REDIRECT)
-                            if utils.is_nonnull(next_url):
-                                logout.msgRelayState = next_url
                             logout.buildRequestMsg()
                         except lasso.Error, e:
                             self.log.error('unable to initiate a logout request %r', e)
@@ -347,8 +395,11 @@ class LogoutView(LogMixin, View):
                             self.log.debug('to URL %r', logout.msgUrl)
                             return HttpResponseRedirect(logout.msgUrl)
                 finally:
-                   auth.logout(request)
-                   self.log.info('user %r logged out, SLO request sent',
+                    auth.logout(request)
+                    # set next_url after local logout, as the session is wiped by auth.logout
+                    if logout:
+                        self.set_next_url(next_url)
+                    self.log.info('user %r logged out, SLO request sent',
                            unicode(request.user))
         else:
             self.log.warning('logout refused referer %r is not of the '
@@ -357,17 +408,14 @@ class LogoutView(LogMixin, View):
 
     def sp_logout_response(self, request):
         '''Launch a logout request to the identity provider'''
-        next_url = resolve_url(settings.LOGIN_REDIRECT_URL)
-        if 'SAMLResponse' not in request.GET:
-            return HttpResponseRedirect(next_url)
-        logout = utils.create_logout(request)
+        self.profile = logout = utils.create_logout(request)
         try:
             logout.processResponseMsg(request.META['QUERY_STRING'])
         except lasso.Error, e:
             self.log.error('unable to process a logout response %r', e)
-        if logout.msgRelayState and utils.same_origin(logout.msgRelayState, request.build_absolute_uri()):
-            return redirect(logout.msgRelayState)
-        return redirect(next_url)
+            return HttpResponseRedirect(resolve_url(settings.LOGIN_REDIRECT_URL))
+        next_url = self.get_next_url(default=resolve_url(settings.LOGIN_REDIRECT_URL))
+        return HttpResponseRedirect(next_url)
 
 
 logout = LogoutView.as_view()
