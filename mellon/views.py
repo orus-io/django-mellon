@@ -409,6 +409,8 @@ class LogoutView(ProfileMixin, LogMixin, View):
         self.profile = logout = utils.create_logout(request)
         try:
             logout.processResponseMsg(request.META['QUERY_STRING'])
+        except lasso.LogoutPartialLogoutError:
+            self.log.warning('partial logout')
         except lasso.Error, e:
             self.log.error('unable to process a logout response %r', e)
             return HttpResponseRedirect(resolve_url(settings.LOGIN_REDIRECT_URL))
