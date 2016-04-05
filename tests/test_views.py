@@ -174,7 +174,7 @@ def test_sp_initiated_login(private_settings, client):
     assert set(params.keys()) == set(['SAMLRequest', 'RelayState'])
     assert len(params['SAMLRequest']) == 1
     assert base64.b64decode(params['SAMLRequest'][0])
-    assert params['RelayState'] == ['/whatever']
+    assert client.session['mellon_next_url_%s' % params['RelayState'][0]] == '/whatever'
 
 
 def test_sp_initiated_login_chosen(private_settings, client):
@@ -192,7 +192,7 @@ def test_sp_initiated_login_chosen(private_settings, client):
     assert set(params.keys()) == set(['SAMLRequest', 'RelayState'])
     assert len(params['SAMLRequest']) == 1
     assert base64.b64decode(params['SAMLRequest'][0])
-    assert params['RelayState'] == ['/whatever']
+    assert client.session['mellon_next_url_%s' % params['RelayState'][0]] == '/whatever'
 
 
 def test_sp_initiated_login_requested_authn_context(private_settings, client):
@@ -211,7 +211,7 @@ def test_sp_initiated_login_requested_authn_context(private_settings, client):
     request = lasso.Samlp2AuthnRequest()
     assert request.initFromQuery(urlparse(response['Location']).query)
     assert request.requestedAuthnContext.authnContextClassRef == (
-            'urn:be:fedict:iam:fas:citizen:eid', 'urn:be:fedict:iam:fas:citizen:token')
+        'urn:be:fedict:iam:fas:citizen:eid', 'urn:be:fedict:iam:fas:citizen:token')
 
 
 def test_malfortmed_artifact(private_settings, client, caplog):
@@ -227,7 +227,7 @@ def test_malfortmed_artifact(private_settings, client, caplog):
 def artifact():
     entity_id = 'https://cresson.entrouvert.org/idp/saml2/metadata'
     token = 'x' * 20
-    return  base64.b64encode('\x00\x04\x00\x00' + hashlib.sha1(entity_id).digest() + token)
+    return base64.b64encode('\x00\x04\x00\x00' + hashlib.sha1(entity_id).digest() + token)
 
 
 def test_error_500_on_artifact_resolve(private_settings, client, caplog, artifact):
@@ -235,7 +235,7 @@ def test_error_500_on_artifact_resolve(private_settings, client, caplog, artifac
         'METADATA': open('tests/metadata.xml').read(),
     }]
     with HTTMock(error_500):
-        response = client.get('/login/?SAMLart=%s' % artifact)
+        client.get('/login/?SAMLart=%s' % artifact)
     assert 'IdP returned 500' in caplog.text()
 
 
@@ -244,5 +244,5 @@ def test_invalid_msg_on_artifact_resolve(private_settings, client, caplog, artif
         'METADATA': open('tests/metadata.xml').read(),
     }]
     with HTTMock(html_response):
-        response = client.get('/login/?SAMLart=%s' % artifact)
+        client.get('/login/?SAMLart=%s' % artifact)
     assert 'ArtifactResolveResponse is malformed' in caplog.text()

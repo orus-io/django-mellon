@@ -98,7 +98,7 @@ class LoginView(ProfileMixin, LogMixin, View):
             login.acceptSso()
         except lasso.ProfileCannotVerifySignatureError:
             self.log.warning('SAML authentication failed: signature validation failed for %r',
-                    login.remoteProviderId)
+                             login.remoteProviderId)
         except lasso.ParamError:
             self.log.exception('lasso param error')
         except (lasso.LoginStatusNotSuccessError,
@@ -116,8 +116,7 @@ class LoginView(ProfileMixin, LogMixin, View):
                 args.append(status.statusMessage)
             self.log.warning(*args)
         except lasso.Error, e:
-            return HttpResponseBadRequest('error processing the authentication '
-                    'response: %r' % e)
+            return HttpResponseBadRequest('error processing the authentication response: %r' % e)
         else:
             if 'RelayState' in request.POST and utils.is_nonnull(request.POST['RelayState']):
                 login.msgRelayState = request.POST['RelayState']
@@ -132,16 +131,17 @@ class LoginView(ProfileMixin, LogMixin, View):
         if error_url:
             error_url = resolve_url(error_url)
         next_url = error_url or login.msgRelayState or resolve_url(settings.LOGIN_REDIRECT_URL)
-        return render(request, 'mellon/authentication_failed.html', {
-                  'debug': settings.DEBUG,
-                  'idp_message': idp_message,
-                  'status_codes': status_codes,
-                  'issuer': login.remoteProviderId,
-                  'next_url': next_url,
-                  'error_url': error_url,
-                  'relaystate': login.msgRelayState,
-                  'error_redirect_after_timeout': error_redirect_after_timeout,
-                })
+        return render(request, 'mellon/authentication_failed.html',
+                      {
+                          'debug': settings.DEBUG,
+                          'idp_message': idp_message,
+                          'status_codes': status_codes,
+                          'issuer': login.remoteProviderId,
+                          'next_url': next_url,
+                          'error_url': error_url,
+                          'relaystate': login.msgRelayState,
+                          'error_redirect_after_timeout': error_redirect_after_timeout,
+                      })
 
     def sso_success(self, request, login):
         attributes = {}
@@ -156,9 +156,11 @@ class LoginView(ProfileMixin, LogMixin, View):
         attributes['issuer'] = login.remoteProviderId
         if login.nameIdentifier:
             name_id = login.nameIdentifier
+            name_id_format = unicode(name_id.format
+                                     or lasso.SAML2_NAME_IDENTIFIER_FORMAT_UNSPECIFIED)
             attributes.update({
                 'name_id_content': name_id.content.decode('utf8'),
-                'name_id_format': unicode(name_id.format or lasso.SAML2_NAME_IDENTIFIER_FORMAT_UNSPECIFIED),
+                'name_id_format': name_id_format
             })
             if name_id.nameQualifier:
                 attributes['name_id_name_qualifier'] = unicode(name_id.nameQualifier)
@@ -168,7 +170,8 @@ class LoginView(ProfileMixin, LogMixin, View):
         if authn_statement.authnInstant:
             attributes['authn_instant'] = utils.iso8601_to_datetime(authn_statement.authnInstant)
         if authn_statement.sessionNotOnOrAfter:
-            attributes['session_not_on_or_after'] = utils.iso8601_to_datetime(authn_statement.sessionNotOnOrAfter)
+            attributes['session_not_on_or_after'] = utils.iso8601_to_datetime(
+                authn_statement.sessionNotOnOrAfter)
         if authn_statement.sessionIndex:
             attributes['session_index'] = authn_statement.sessionIndex
         attributes['authn_context_class_ref'] = ()
@@ -186,19 +189,21 @@ class LoginView(ProfileMixin, LogMixin, View):
         if user is not None:
             if user.is_active:
                 auth.login(request, user)
-                self.log.info('user %r (NameID is %r) logged in using SAML',
-                        unicode(user), attributes['name_id_content'])
+                self.log.info('user %r (NameID is %r) logged in using SAML', unicode(user),
+                              attributes['name_id_content'])
                 request.session['mellon_session'] = utils.flatten_datetime(attributes)
                 if ('session_not_on_or_after' in attributes and
-                    not settings.SESSION_EXPIRE_AT_BROWSER_CLOSE):
-                    request.session.set_expiry(utils.get_seconds_expiry(attributes['session_not_on_or_after']))
+                        not settings.SESSION_EXPIRE_AT_BROWSER_CLOSE):
+                    request.session.set_expiry(
+                        utils.get_seconds_expiry(
+                            attributes['session_not_on_or_after']))
             else:
                 return render(request, 'mellon/inactive_user.html', {
                     'user': user,
                     'saml_attributes': attributes})
         else:
-            return render(request, 'mellon/user_not_found.html', {
-                'saml_attributes': attributes })
+            return render(request, 'mellon/user_not_found.html',
+                          {'saml_attributes': attributes})
         request.session['lasso_session_dump'] = login.session.dump()
 
         return HttpResponseRedirect(next_url)
@@ -229,14 +234,14 @@ class LoginView(ProfileMixin, LogMixin, View):
         login.buildRequestMsg()
         try:
             result = requests.post(login.msgUrl, data=login.msgBody,
-                headers={'content-type': 'text/xml'},
-                verify=verify_ssl_certificate)
+                                   headers={'content-type': 'text/xml'},
+                                   verify=verify_ssl_certificate)
         except RequestException, e:
             self.log.warning('unable to reach %r: %s', login.msgUrl, e)
             return HttpResponseBadRequest('unable to reach %r: %s' % (login.msgUrl, e))
         if result.status_code != 200:
-            self.log.warning('SAML authentication failed: '\
-                             'IdP returned %s when given artifact', result.status_code)
+            self.log.warning('SAML authentication failed: IdP returned %s when given artifact',
+                             result.status_code)
             return self.sso_failure(request, login, idp_message, status_codes)
 
         try:
@@ -251,7 +256,7 @@ class LoginView(ProfileMixin, LogMixin, View):
                 return HttpResponseBadRequest('ArtififactResolveResponse is malformed')
         except lasso.ProfileCannotVerifySignatureError:
             self.log.warning('SAML authentication failed: signature validation failed for %r',
-                    login.remoteProviderId)
+                             login.remoteProviderId)
         except lasso.ParamError:
             self.log.exception('lasso param error')
         except (lasso.ProfileStatusNotSuccessError, lasso.ProfileRequestDeniedError):
@@ -268,8 +273,7 @@ class LoginView(ProfileMixin, LogMixin, View):
             self.log.warning(*args)
         except lasso.Error, e:
             self.log.exception('unexpected lasso error')
-            return HttpResponseBadRequest('error processing the authentication '
-                    'response: %r' % e)
+            return HttpResponseBadRequest('error processing the authentication response: %r' % e)
         else:
             if 'RelayState' in request.GET and utils.is_nonnull(request.GET['RelayState']):
                 login.msgRelayState = request.GET['RelayState']
@@ -296,8 +300,8 @@ class LoginView(ProfileMixin, LogMixin, View):
 
         # redirect to discovery service if needed
         if (not 'entityID' in request.GET
-            and not 'nodisco' in request.GET
-            and app_settings.DISCOVERY_SERVICE_URL):
+                and not 'nodisco' in request.GET
+                and app_settings.DISCOVERY_SERVICE_URL):
             return self.request_discovery_service(
                 request, is_passive=request.GET.get('passive') == '1')
 
@@ -308,8 +312,7 @@ class LoginView(ProfileMixin, LogMixin, View):
         self.profile = login = utils.create_login(request)
         self.log.debug('authenticating to %r', idp['ENTITY_ID'])
         try:
-            login.initAuthnRequest(idp['ENTITY_ID'],
-                    lasso.HTTP_METHOD_REDIRECT)
+            login.initAuthnRequest(idp['ENTITY_ID'], lasso.HTTP_METHOD_REDIRECT)
             authn_request = login.request
             # configure NameID policy
             policy = authn_request.nameIdPolicy
@@ -329,13 +332,13 @@ class LoginView(ProfileMixin, LogMixin, View):
             self.set_next_url(next_url)
             login.buildAuthnRequestMsg()
         except lasso.Error, e:
-            return HttpResponseBadRequest('error initializing the '
-                    'authentication request: %r' % e)
+            return HttpResponseBadRequest('error initializing the authentication request: %r' % e)
         self.log.debug('sending authn request %r', authn_request.dump())
         self.log.debug('to url %r', login.msgUrl)
         return HttpResponseRedirect(login.msgUrl)
 
 login = csrf_exempt(LoginView.as_view())
+
 
 class LogoutView(ProfileMixin, LogMixin, View):
     def get(self, request):
@@ -359,8 +362,7 @@ class LogoutView(ProfileMixin, LogMixin, View):
             self.log.warning('error validating logout request: %r' % e)
         issuer = request.session.get('mellon_session', {}).get('issuer')
         if issuer == logout.remoteProviderId:
-            self.log.info('user %r logged out by SLO request',
-                    unicode(request.user))
+            self.log.info(u'user logged out by IdP SLO request')
             auth.logout(request)
         try:
             logout.buildResponseMsg()
@@ -380,10 +382,8 @@ class LogoutView(ProfileMixin, LogMixin, View):
                     if issuer:
                         self.profile = logout = utils.create_logout(request)
                         try:
-                            if request.session.has_key('lasso_session_dump'):
-                                logout.setSessionFromDump(
-                                        request.session['lasso_session_dump']
-                                        )
+                            if 'lasso_session_dump' in request.session:
+                                logout.setSessionFromDump(request.session['lasso_session_dump'])
                             else:
                                 self.log.error('unable to find lasso session dump')
                             logout.initRequest(issuer, lasso.HTTP_METHOD_REDIRECT)
@@ -399,11 +399,9 @@ class LogoutView(ProfileMixin, LogMixin, View):
                     # set next_url after local logout, as the session is wiped by auth.logout
                     if logout:
                         self.set_next_url(next_url)
-                    self.log.info('user %r logged out, SLO request sent',
-                           unicode(request.user))
+                    self.log.info(u'user logged out, SLO request sent to IdP')
         else:
-            self.log.warning('logout refused referer %r is not of the '
-                    'same origin', referer)
+            self.log.warning('logout refused referer %r is not of the same origin', referer)
         return HttpResponseRedirect(next_url)
 
     def sp_logout_response(self, request):
