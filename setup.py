@@ -8,7 +8,7 @@ import subprocess
 from setuptools import setup, find_packages
 from setuptools.command.install_lib import install_lib as _install_lib
 from distutils.command.build import build as _build
-from distutils.command.sdist import sdist as _sdist
+from setuptools.command.sdist import sdist as _sdist
 from distutils.cmd import Command
 
 
