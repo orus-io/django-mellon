@@ -85,6 +85,8 @@ class LoginView(ProfileMixin, LogMixin, View):
 
     def post(self, request, *args, **kwargs):
         '''Assertion consumer'''
+        if 'SAMLart' in request.POST:
+            return self.continue_sso_artifact(request, lasso.HTTP_METHOD_ARTIFACT_POST)
         if 'SAMLResponse' not in request.POST:
             return self.get(request, *args, **kwargs)
         if not utils.is_nonnull(request.POST['SAMLResponse']):
@@ -208,22 +210,29 @@ class LoginView(ProfileMixin, LogMixin, View):
 
         return HttpResponseRedirect(next_url)
 
-    def continue_sso_artifact_get(self, request):
+    def continue_sso_artifact(self, request, method):
         idp_message = None
         status_codes = []
 
+        if method == lasso.HTTP_METHOD_ARTIFACT_GET:
+            message = request.META['QUERY_STRING']
+            artifact = request.GET['SAMLart']
+            relay_state = request.GET.get('RelayState')
+        else: # method == lasso.HTTP_METHOD_ARTIFACT_POST:
+            message = request.POST['SAMLart']
+            artifact = request.POST['SAMLart']
+            relay_state = request.POST.get('RelayState')
+
         self.profile = login = utils.create_login(request)
         try:
-            login.initRequest(request.META['QUERY_STRING'], lasso.HTTP_METHOD_ARTIFACT_GET)
+            login.initRequest(message, method)
         except lasso.ProfileInvalidArtifactError:
-            self.log.warning(u'artifact is malformed %r', request.GET['SAMLart'])
-            return HttpResponseBadRequest(u'artifact is malformed %r' % request.GET['SAMLart'])
+            self.log.warning(u'artifact is malformed %r', artifact)
+            return HttpResponseBadRequest(u'artifact is malformed %r' % artifact)
         except lasso.ServerProviderNotFoundError:
-            self.log.warning('no entity id found for artifact %s',
-                             request.GET['SAMLart'])
+            self.log.warning('no entity id found for artifact %s', artifact)
             return HttpResponseBadRequest(
-                'no entity id found for this artifact %r' %
-                request.GET['SAMLart'])
+                'no entity id found for this artifact %r' % artifact)
         idp = utils.get_idp(login.remoteProviderId)
         if not idp:
             self.log.warning('entity id %r is unknown', login.remoteProviderId)
@@ -275,8 +284,8 @@ class LoginView(ProfileMixin, LogMixin, View):
             self.log.exception('unexpected lasso error')
             return HttpResponseBadRequest('error processing the authentication response: %r' % e)
         else:
-            if 'RelayState' in request.GET and utils.is_nonnull(request.GET['RelayState']):
-                login.msgRelayState = request.GET['RelayState']
+            if relay_state and utils.is_nonnull(relay_state):
+                login.msgRelayState = relay_state
             return self.sso_success(request, login)
         return self.sso_failure(request, login, idp_message, status_codes)
 
@@ -296,7 +305,7 @@ class LoginView(ProfileMixin, LogMixin, View):
     def get(self, request, *args, **kwargs):
         '''Initialize login request'''
         if 'SAMLart' in request.GET:
-            return self.continue_sso_artifact_get(request)
+            return self.continue_sso_artifact(request, lasso.HTTP_METHOD_ARTIFACT_GET)
 
         # redirect to discovery service if needed
         if (not 'entityID' in request.GET
