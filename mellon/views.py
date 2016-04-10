@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, resolve_url
 from django.utils.http import urlencode
 from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.db import transaction
 
 from . import app_settings, utils
 
@@ -346,7 +347,8 @@ class LoginView(ProfileMixin, LogMixin, View):
         self.log.debug('to url %r', login.msgUrl)
         return HttpResponseRedirect(login.msgUrl)
 
-login = csrf_exempt(LoginView.as_view())
+# we need fine control of transactions to prevent double user creations
+login = transaction.non_atomic_requests(csrf_exempt(LoginView.as_view()))
 
 
 class LogoutView(ProfileMixin, LogMixin, View):
