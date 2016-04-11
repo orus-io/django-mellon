@@ -250,15 +250,15 @@ class LoginView(ProfileMixin, LogMixin, View):
             self.log.warning('unable to reach %r: %s', login.msgUrl, e)
             return HttpResponseBadRequest('unable to reach %r: %s' % (login.msgUrl, e))
         if result.status_code != 200:
-            self.log.warning('SAML authentication failed: IdP returned %s when given artifact',
-                             result.status_code)
+            self.log.warning('SAML authentication failed: IdP returned %s when given artifact: %r',
+                             result.status_code, result.content)
             return self.sso_failure(request, login, idp_message, status_codes)
 
         try:
             login.processResponseMsg(result.content)
             login.acceptSso()
         except lasso.ProfileInvalidMsgError:
-            self.log.warning('ArtifactResolveResponse is malformed %r' % result.content[:200])
+            self.log.warning('ArtifactResolveResponse is malformed %r', result.content[:200])
             if settings.DEBUG:
                 return HttpResponseBadRequest('ArtififactResolveResponse is malformed\n%r' %
                                               result.content)
