@@ -107,7 +107,22 @@ class DefaultAdapter(object):
 
     def lookup_user(self, idp, saml_attributes):
         User = auth.get_user_model()
-        name_id = saml_attributes['name_id_content']
+        transient_federation_attribute = utils.get_setting(idp, 'TRANSIENT_FEDERATION_ATTRIBUTE')
+        if saml_attributes['name_id_format'] == lasso.SAML2_NAME_IDENTIFIER_FORMAT_TRANSIENT:
+            if (transient_federation_attribute
+                    and saml_attributes.get(transient_federation_attribute)):
+                name_id = saml_attributes[transient_federation_attribute]
+                if not isinstance(name_id, basestring):
+                    if len(name_id) == 1:
+                        name_id = name_id[0]
+                    else:
+                        self.logger.warning('more than one value for attribute %r, cannot federate',
+                                            transient_federation_attribute)
+                        return None
+            else:
+                return None
+        else:
+            name_id = saml_attributes['name_id_content']
         issuer = saml_attributes['issuer']
         try:
             return User.objects.get(saml_identifiers__name_id=name_id,

@@ -247,6 +247,14 @@ MELLON_VERIFY_SSL_CERTIFICATE
 Verify SSL certificate when doing HTTP requests, used when resolving artifacts.
 Default is True.
 
+MELLON_TRANSIENT_FEDERATION_ATTRIBUTE
+-------------------------------------
+
+Name of an attribute to use in replacement of the NameID content when the NameID
+format is transient. Without it no login using a transient NameID can occur with
+the default adapter.
+Default is None.
+
 Tests
 =====
 

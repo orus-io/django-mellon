@@ -1,6 +1,7 @@
 import threading
 import pytest
 import re
+import lasso
 
 from django.contrib import auth
 from django.db import connection
@@ -14,6 +15,7 @@ idp = {
     'METADATA': file('tests/metadata.xml').read(),
 }
 saml_attributes = {
+    'name_id_format': lasso.SAML2_NAME_IDENTIFIER_FORMAT_PERSISTENT,
     'name_id_content': 'x' * 32,
     'issuer': 'https://cresson.entrouvert.org/idp/saml2/metadata',
     'username': ['foobar'],
@@ -164,3 +166,27 @@ def test_provision_long_attribute(settings, django_user_model, caplog):
     assert 'to value %r ' % (u'y' * 30) in caplog.text()
     assert 'set field last_name' in caplog.text()
     assert 'set field email' in caplog.text()
+
+
+def test_lookup_user_transient_with_email(private_settings):
+    private_settings.MELLON_TRANSIENT_FEDERATION_ATTRIBUTE = 'email'
+    User = auth.get_user_model()
+    adapter = DefaultAdapter()
+    saml_attributes2 = saml_attributes.copy()
+    saml_attributes2['name_id_format'] = lasso.SAML2_NAME_IDENTIFIER_FORMAT_TRANSIENT
+    assert User.objects.count() == 0
+    user = adapter.lookup_user(idp, saml_attributes2)
+    assert user is not None
+    assert user.saml_identifiers.count() == 1
+    assert user.saml_identifiers.first().name_id == saml_attributes2['email'][0]
+
+    user2 = adapter.lookup_user(idp, saml_attributes2)
+    assert user.id == user2.id
+
+    User.objects.all().delete()
+    assert User.objects.count() == 0
+
+    private_settings.MELLON_PROVISION = False
+    user = adapter.lookup_user(idp, saml_attributes)
+    assert user is None
+    assert User.objects.count() == 0

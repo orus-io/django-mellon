@@ -32,6 +32,7 @@ class AppSettings(object):
         'OPENED_SESSION_COOKIE_DOMAIN': None,
         'ORGANIZATION': None,
         'CONTACT_PERSONS': [],
+        'TRANSIENT_FEDERATION_ATTRIBUTE': None,
     }
 
     @property
