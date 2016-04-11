@@ -93,7 +93,7 @@ setup(name="django-mellon",
       install_requires=[
           'django>=1.5',
           'requests',
-          'python-dateutil',
+          'isodate',
       ],
       setup_requires=[
           'django',

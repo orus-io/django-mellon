@@ -2,7 +2,7 @@ import logging
 import datetime
 import importlib
 from functools import wraps
-import dateutil.parser
+import isodate
 
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
@@ -115,12 +115,15 @@ def flatten_datetime(d):
     return d
 
 
-def iso8601_to_datetime(date_string):
-    '''Convert a string formatted as an ISO8601 date into a time_t
+def iso8601_to_datetime(date_string, default=None):
+    '''Convert a string formatted as an ISO8601 date into a datetime
        value.
 
        This function ignores the sub-second resolution'''
-    dt = dateutil.parser.parse(date_string)
+    try:
+        dt = isodate.parse_datetime(date_string)
+    except:
+        return default
     if is_aware(dt):
         if not settings.USE_TZ:
             dt = make_naive(dt, get_default_timezone())
