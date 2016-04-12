@@ -250,9 +250,9 @@ Default is True.
 Tests
 =====
 
-Unit tests are written using pytest, and can be run with:
+Unit tests are written using pytest and launched using tox, and can be run with:
 
-   DJANGO_SETTINGS_MODULE=testsettings py.test
+   tox
 
 Remarks
 =======
