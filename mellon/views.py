@@ -338,9 +338,10 @@ class LoginView(ProfileMixin, LogMixin, View):
             # configure requested AuthnClassRef
             authn_classref = utils.get_setting(idp, 'AUTHN_CLASSREF')
             if authn_classref:
+                authn_classref = tuple([str(x) for x in authn_classref])
                 req_authncontext = lasso.Samlp2RequestedAuthnContext()
                 authn_request.requestedAuthnContext = req_authncontext
-                req_authncontext.authnContextClassRef = tuple(authn_classref)
+                req_authncontext.authnContextClassRef = authn_classref
             self.set_next_url(next_url)
             login.buildAuthnRequestMsg()
         except lasso.Error, e:

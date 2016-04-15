@@ -198,8 +198,8 @@ def test_sp_initiated_login_chosen(private_settings, client):
 def test_sp_initiated_login_requested_authn_context(private_settings, client):
     private_settings.MELLON_IDENTITY_PROVIDERS = [{
         'METADATA': open('tests/metadata.xml').read(),
-        'AUTHN_CLASSREF': ['urn:be:fedict:iam:fas:citizen:eid',
-                           'urn:be:fedict:iam:fas:citizen:token'],
+        'AUTHN_CLASSREF': [u'urn:be:fedict:iam:fas:citizen:eid',
+                           u'urn:be:fedict:iam:fas:citizen:token'],
     }]
     response = client.get('/login/')
     assert response.status_code == 302
