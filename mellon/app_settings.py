@@ -33,6 +33,8 @@ class AppSettings(object):
         'ORGANIZATION': None,
         'CONTACT_PERSONS': [],
         'TRANSIENT_FEDERATION_ATTRIBUTE': None,
+        'LOGIN_URL': 'mellon_login',
+        'LOGOUT_URL': 'mellon_logout',
     }
 
     @property

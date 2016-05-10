@@ -18,8 +18,8 @@ def create_metadata(request):
     entity_id = reverse('mellon_metadata')
     cache = getattr(settings, '_MELLON_METADATA_CACHE', {})
     if not entity_id in cache:
-        login_url = reverse('mellon_login')
-        logout_url = reverse('mellon_logout')
+        login_url = reverse(app_settings.LOGIN_URL)
+        logout_url = reverse(app_settings.LOGOUT_URL)
         public_keys = []
         for public_key in app_settings.PUBLIC_KEYS:
             if public_key.startswith('/'):
