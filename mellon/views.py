@@ -421,6 +421,10 @@ class LogoutView(ProfileMixin, LogMixin, View):
     def sp_logout_response(self, request):
         '''Launch a logout request to the identity provider'''
         self.profile = logout = utils.create_logout(request)
+        # the user shouldn't be logged anymore at this point but it may happen
+        # that a concurrent SSO happened in the meantime, so we do another
+        # logout to make sure.
+        auth.logout(request)
         try:
             logout.processResponseMsg(request.META['QUERY_STRING'])
         except lasso.LogoutPartialLogoutError:
