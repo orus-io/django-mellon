@@ -219,3 +219,21 @@ def same_origin(url1, url2):
         return (p1.scheme, p1.hostname, p1.port) == (p2.scheme, p2.hostname, p2.port)
     except ValueError:
         return False
+
+
+def get_status_codes_and_message(profile):
+    assert profile, 'missing lasso.Profile'
+    assert profile.response, 'missing response in profile'
+    assert profile.response.status, 'missing status in response'
+
+    status_codes = []
+
+    status = profile.response.status
+    a = status
+    while a.statusCode:
+        status_codes.append(a.statusCode.value.decode('utf-8'))
+        a = a.statusCode
+    message = None
+    if status.statusMessage:
+        message = status.statusMessage.decode('utf-8')
+    return status_codes, message

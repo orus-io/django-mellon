@@ -72,6 +72,14 @@ class ProfileMixin(object):
     def get_next_url(self, default=None):
         return self.get_state('next_url', default=default)
 
+    def show_message_status_is_not_success(self, profile, prefix):
+        status_codes, idp_message = utils.get_status_codes_and_message(profile)
+        args = [u'%s: status is not success codes: %r', prefix, status_codes]
+        if idp_message:
+            args[0] += u' message: %s'
+            args.append(idp_message)
+        self.log.warning(*args)
+
 
 class LoginView(ProfileMixin, LogMixin, View):
     def get_idp(self, request):
@@ -107,17 +115,7 @@ class LoginView(ProfileMixin, LogMixin, View):
         except (lasso.LoginStatusNotSuccessError,
                 lasso.ProfileStatusNotSuccessError,
                 lasso.ProfileRequestDeniedError):
-            status = login.response.status
-            a = status
-            while a.statusCode:
-                status_codes.append(a.statusCode.value)
-                a = a.statusCode
-            args = ['SAML authentication failed: status is not success codes: %r', status_codes]
-            if status.statusMessage:
-                idp_message = status.statusMessage.decode('utf-8')
-                args[0] += ' message: %r'
-                args.append(status.statusMessage)
-            self.log.warning(*args)
+            self.show_message_status_is_not_success(login, 'SAML authentication failed')
         except lasso.Error, e:
             return HttpResponseBadRequest('error processing the authentication response: %r' % e)
         else:
@@ -201,10 +199,13 @@ class LoginView(ProfileMixin, LogMixin, View):
                         utils.get_seconds_expiry(
                             attributes['session_not_on_or_after']))
             else:
+                self.log.warning('user %r (NameID is %r) is inactive, login refused', unicode(user),
+                                 attributes['name_id_content'])
                 return render(request, 'mellon/inactive_user.html', {
                     'user': user,
                     'saml_attributes': attributes})
         else:
+            self.log.warning('no user found for NameID %r', attributes['name_id_content'])
             return render(request, 'mellon/user_not_found.html',
                           {'saml_attributes': attributes})
         request.session['lasso_session_dump'] = login.session.dump()
@@ -427,10 +428,12 @@ class LogoutView(ProfileMixin, LogMixin, View):
         auth.logout(request)
         try:
             logout.processResponseMsg(request.META['QUERY_STRING'])
+        except lasso.ProfileStatusNotSuccessError:
+            self.show_message_status_is_not_success(logout, 'SAML logout failed')
         except lasso.LogoutPartialLogoutError:
             self.log.warning('partial logout')
         except lasso.Error, e:
-            self.log.error('unable to process a logout response %r', e)
+            self.log.warning('unable to process a logout response: %s', e)
             return HttpResponseRedirect(resolve_url(settings.LOGIN_REDIRECT_URL))
         next_url = self.get_next_url(default=resolve_url(settings.LOGIN_REDIRECT_URL))
         return HttpResponseRedirect(next_url)
