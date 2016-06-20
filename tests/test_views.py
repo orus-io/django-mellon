@@ -170,7 +170,7 @@ def test_sp_initiated_login(private_settings, client):
     response = client.get('/login/?next=%2Fwhatever')
     assert response.status_code == 302
     params = parse_qs(urlparse(response['Location']).query)
-    assert response['Location'].startswith('https://cresson.entrouvert.org/idp/saml2/sso?')
+    assert response['Location'].startswith('http://idp5/singleSignOn?')
     assert set(params.keys()) == set(['SAMLRequest', 'RelayState'])
     assert len(params['SAMLRequest']) == 1
     assert base64.b64decode(params['SAMLRequest'][0])
@@ -182,13 +182,13 @@ def test_sp_initiated_login_chosen(private_settings, client):
         'METADATA': open('tests/metadata.xml').read(),
     }]
     qs = urlencode({
-        'entityID': 'https://cresson.entrouvert.org/idp/saml2/metadata',
+        'entityID': 'http://idp5/metadata',
         'next': '/whatever',
     })
     response = client.get('/login/?' + qs)
     assert response.status_code == 302
     params = parse_qs(urlparse(response['Location']).query)
-    assert response['Location'].startswith('https://cresson.entrouvert.org/idp/saml2/sso?')
+    assert response['Location'].startswith('http://idp5/singleSignOn?')
     assert set(params.keys()) == set(['SAMLRequest', 'RelayState'])
     assert len(params['SAMLRequest']) == 1
     assert base64.b64decode(params['SAMLRequest'][0])
@@ -204,7 +204,7 @@ def test_sp_initiated_login_requested_authn_context(private_settings, client):
     response = client.get('/login/')
     assert response.status_code == 302
     params = parse_qs(urlparse(response['Location']).query)
-    assert response['Location'].startswith('https://cresson.entrouvert.org/idp/saml2/sso?')
+    assert response['Location'].startswith('http://idp5/singleSignOn?')
     assert params.keys() == ['SAMLRequest']
     assert len(params['SAMLRequest']) == 1
     assert base64.b64decode(params['SAMLRequest'][0])
@@ -225,7 +225,7 @@ def test_malfortmed_artifact(private_settings, client, caplog):
 
 @pytest.fixture
 def artifact():
-    entity_id = 'https://cresson.entrouvert.org/idp/saml2/metadata'
+    entity_id = 'http://idp5/metadata'
     token = 'x' * 20
     return base64.b64encode('\x00\x04\x00\x00' + hashlib.sha1(entity_id).digest() + token)
 

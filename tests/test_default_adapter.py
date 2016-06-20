@@ -17,7 +17,7 @@ idp = {
 saml_attributes = {
     'name_id_format': lasso.SAML2_NAME_IDENTIFIER_FORMAT_PERSISTENT,
     'name_id_content': 'x' * 32,
-    'issuer': 'https://cresson.entrouvert.org/idp/saml2/metadata',
+    'issuer': 'http://idp5/metadata',
     'username': ['foobar'],
     'email': ['test@example.net'],
     'first_name': ['Foo'],

@@ -12,9 +12,10 @@ DATABASES = {
     }
 }
 DEBUG = True
-SECRET_KEY='xx'
+SECRET_KEY = 'xx'
 STATIC_URL = '/static/'
-INSTALLED_APPS = ('mellon', 'django.contrib.auth', 'django.contrib.contenttypes', 'django.contrib.sessions')
+INSTALLED_APPS = ('mellon', 'django.contrib.auth',
+                  'django.contrib.contenttypes', 'django.contrib.sessions')
 MIDDLEWARE_CLASSES = global_settings.MIDDLEWARE_CLASSES
 MIDDLEWARE_CLASSES += (
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -23,11 +24,11 @@ MIDDLEWARE_CLASSES += (
 AUTHENTICATION_BACKENDS = (
     'mellon.backends.SAMLBackend',
 )
-ROOT_URLCONF = 'mellon.urls'
+ROOT_URLCONF = 'urls_tests'
 TEMPLATE_DIRS = [
     'tests/templates/',
 ]
-if django.VERSION >= (1,8):
+if django.VERSION >= (1, 8):
     TEMPLATES = [
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
