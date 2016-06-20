@@ -54,7 +54,7 @@ def create_server(request):
             private_key = app_settings.PRIVATE_KEY
             private_key_password = app_settings.PRIVATE_KEY_PASSWORD
         elif app_settings.PRIVATE_KEYS:
-            private_key = app_settings.PRIVATE_KEYS
+            private_key = app_settings.PRIVATE_KEYS[0]
             private_key_password = None
             if isinstance(private_key, (tuple, list)):
                 private_key_password = private_key[1]
@@ -65,7 +65,11 @@ def create_server(request):
         server = lasso.Server.newFromBuffers(metadata, private_key_content=private_key,
                                              private_key_password=private_key_password)
         server.setEncryptionPrivateKeyWithPassword(private_key, private_key_password)
-        for key in app_settings.PRIVATE_KEYS:
+        private_keys = app_settings.PRIVATE_KEYS
+        # skip first key if it is already loaded
+        if not app_settings.PRIVATE_KEY:
+            private_keys = app_settings.PRIVATE_KEYS[1:]
+        for key in private_keys:
             password = None
             if isinstance(key, (tuple, list)):
                 password = key[1]
