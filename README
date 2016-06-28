@@ -255,6 +255,12 @@ format is transient. Without it no login using a transient NameID can occur with
 the default adapter.
 Default is None.
 
+MELLON_DEFAULT_ASSERTION_CONSUMER_BINDING
+-----------------------------------------
+
+Should be post or artifact. Default is post. You can refer to the SAML 2.0
+specification to learn the difference.
+
 Tests
 =====
 
