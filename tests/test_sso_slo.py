@@ -1,4 +1,3 @@
-import os
 import lasso
 
 from pytest import fixture
@@ -6,6 +5,10 @@ from pytest import fixture
 from django.core.urlresolvers import reverse
 
 from mellon.utils import create_metadata
+
+from httmock import all_requests, HTTMock, response as mock_response
+
+from utils import reset_caplog
 
 
 @fixture
@@ -57,15 +60,42 @@ class MockIdp(object):
         try:
             login.validateRequestMsg(auth_result, consent)
         except lasso.LoginRequestDeniedError:
-            login.buildAuthnResponseMsg()
+            pass
         else:
             login.buildAssertion(lasso.SAML_AUTHENTICATION_METHOD_PASSWORD,
                                  "FIXME",
                                  "FIXME",
                                  "FIXME",
                                  "FIXME")
+        if login.protocolProfile == lasso.LOGIN_PROTOCOL_PROFILE_BRWS_ART:
+            login.buildArtifactMsg(lasso.HTTP_METHOD_ARTIFACT_GET)
+            self.artifact = login.artifact
+            self.artifact_message = login.artifactMessage
+        elif login.protocolProfile == lasso.LOGIN_PROTOCOL_PROFILE_BRWS_POST:
             login.buildAuthnResponseMsg()
+        else:
+            raise NotImplementedError
         return login.msgUrl, login.msgBody
+
+    def resolve_artifact(self, soap_message):
+        login = lasso.Login(self.server)
+        login.processRequestMsg(soap_message)
+        if hasattr(self, 'artifact') and self.artifact == login.artifact:
+            # artifact is known, go on !
+            login.artifactMessage = self.artifact_message
+            # forget the artifact
+            del self.artifact
+            del self.artifact_message
+        login.buildResponseMsg()
+        return login.msgBody
+
+    def mock_artifact_resolver(self):
+        @all_requests
+        def f(url, request):
+            content = self.resolve_artifact(request.body)
+            return mock_response(200, content=content,
+                                 headers={'Content-Type': 'application/soap+xml'})
+        return f
 
 
 @fixture
@@ -100,3 +130,44 @@ def test_sso_request_denied(db, app, idp, caplog, sp_settings):
     response = app.post(reverse('mellon_login'), {'SAMLResponse': body})
     assert "status is not success codes: [u'urn:oasis:names:tc:SAML:2.0:status:Responder',\
  u'urn:oasis:names:tc:SAML:2.0:status:RequestDenied']" in caplog.text()
+
+
+def test_sso_artifact(db, app, caplog, sp_settings, idp_metadata, idp_private_key, rf):
+    sp_settings.MELLON_DEFAULT_ASSERTION_CONSUMER_BINDING = 'artifact'
+    request = rf.get('/')
+    sp_metadata = create_metadata(request)
+    idp = MockIdp(idp_metadata, idp_private_key, sp_metadata)
+    response = app.get(reverse('mellon_login'))
+    url, body = idp.process_authn_request_redirect(response['Location'])
+    assert body is None
+    assert reverse('mellon_login') in url
+    assert 'SAMLart' in url
+    acs_artifact_url = url.split('testserver', 1)[1]
+    with HTTMock(idp.mock_artifact_resolver()):
+        response = app.get(acs_artifact_url)
+    assert 'created new user' in caplog.text()
+    assert 'logged in using SAML' in caplog.text()
+    assert response['Location'].endswith(sp_settings.LOGIN_REDIRECT_URL)
+    # force delog
+    app.session.flush()
+    assert 'dead artifact' not in caplog.text()
+    with HTTMock(idp.mock_artifact_resolver()):
+        response = app.get(acs_artifact_url)
+    # verify retry login was asked
+    assert 'dead artifact' in caplog.text()
+    assert response.status_code == 302
+    assert reverse('mellon_login') in url
+    response = response.follow()
+    url, body = idp.process_authn_request_redirect(response['Location'])
+    reset_caplog(caplog)
+    # verify caplog has been cleaned
+    assert 'created new user' not in caplog.text()
+    assert body is None
+    assert reverse('mellon_login') in url
+    assert 'SAMLart' in url
+    acs_artifact_url = url.split('testserver', 1)[1]
+    with HTTMock(idp.mock_artifact_resolver()):
+        response = app.get(acs_artifact_url)
+    assert 'created new user' in caplog.text()
+    assert 'logged in using SAML' in caplog.text()
+    assert response['Location'].endswith(sp_settings.LOGIN_REDIRECT_URL)

@@ -14,3 +14,8 @@ def html_response(url, request):
 @all_requests
 def metadata_response(url, request):
     return response(200, content=file('tests/metadata.xml').read())
+
+
+def reset_caplog(cap):
+    cap.handler.stream.truncate(0)
+    cap.handler.records = []

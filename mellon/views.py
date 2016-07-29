@@ -4,6 +4,7 @@ import lasso
 import uuid
 from requests.exceptions import RequestException
 
+from django.core.urlresolvers import reverse
 from django.views.generic import View
 from django.http import HttpResponseBadRequest, HttpResponseRedirect, HttpResponse
 from django.contrib import auth
@@ -13,6 +14,7 @@ from django.shortcuts import render, resolve_url
 from django.utils.http import urlencode
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.db import transaction
+from django.utils.translation import ugettext as _
 
 from . import app_settings, utils
 
@@ -212,6 +214,14 @@ class LoginView(ProfileMixin, LogMixin, View):
 
         return HttpResponseRedirect(next_url)
 
+    def retry_login(self):
+        '''Retry login if it failed for a temporary error'''
+        url = reverse('mellon_login')
+        next_url = self.get_next_url()
+        if next_url:
+            url = '%s?%s' % (url, urlencode({REDIRECT_FIELD_NAME: next_url}))
+        return HttpResponseRedirect(url)
+
     def continue_sso_artifact(self, request, method):
         idp_message = None
         status_codes = []
@@ -220,12 +230,14 @@ class LoginView(ProfileMixin, LogMixin, View):
             message = request.META['QUERY_STRING']
             artifact = request.GET['SAMLart']
             relay_state = request.GET.get('RelayState')
-        else: # method == lasso.HTTP_METHOD_ARTIFACT_POST:
+        else:  # method == lasso.HTTP_METHOD_ARTIFACT_POST:
             message = request.POST['SAMLart']
             artifact = request.POST['SAMLart']
             relay_state = request.POST.get('RelayState')
 
         self.profile = login = utils.create_login(request)
+        if relay_state and utils.is_nonnull(relay_state):
+            login.msgRelayState = relay_state
         try:
             login.initRequest(message, method)
         except lasso.ProfileInvalidArtifactError:
@@ -249,7 +261,8 @@ class LoginView(ProfileMixin, LogMixin, View):
                                    verify=verify_ssl_certificate)
         except RequestException, e:
             self.log.warning('unable to reach %r: %s', login.msgUrl, e)
-            return HttpResponseBadRequest('unable to reach %r: %s' % (login.msgUrl, e))
+            return self.sso_failure(request, login, _('IdP is temporarily down, please try again '
+                                                      'later.'), status_codes)
         if result.status_code != 200:
             self.log.warning('SAML authentication failed: IdP returned %s when given artifact: %r',
                              result.status_code, result.content)
@@ -258,6 +271,10 @@ class LoginView(ProfileMixin, LogMixin, View):
         try:
             login.processResponseMsg(result.content)
             login.acceptSso()
+        except lasso.ProfileMissingResponseError:
+            # artifact is invalid, idp returned no response
+            self.log.warning('ArtifactResolveResponse is empty: dead artifact %r', artifact)
+            return self.retry_login()
         except lasso.ProfileInvalidMsgError:
             self.log.warning('ArtifactResolveResponse is malformed %r', result.content[:200])
             if settings.DEBUG:
@@ -288,8 +305,6 @@ class LoginView(ProfileMixin, LogMixin, View):
             self.log.exception('unexpected lasso error')
             return HttpResponseBadRequest('error processing the authentication response: %r' % e)
         else:
-            if relay_state and utils.is_nonnull(relay_state):
-                login.msgRelayState = relay_state
             return self.sso_success(request, login)
         return self.sso_failure(request, login, idp_message, status_codes)
 
