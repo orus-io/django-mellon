@@ -17,6 +17,9 @@ class PassiveAuthenticationMiddleware(object):
         return response
 
     def process_view(self, request, view_func, view_args, view_kwargs):
+        # Skip views asking to be skiped
+        if getattr(view_func, 'mellon_no_passive', False):
+            return
         # Skip mellon views
         if request.resolver_match.url_name and request.resolver_match.url_name.startswith('mellon_'):
             return
