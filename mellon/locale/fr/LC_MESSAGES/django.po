@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-mellon\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-05-02 13:59+0200\n"
-"PO-Revision-Date: 2014-05-02 13:59+0200\n"
+"POT-Creation-Date: 2016-10-23 17:45+0200\n"
+"PO-Revision-Date: 2016-10-23 17:47+0200\n"
 "Last-Translator: Benjamin Dauvergne <bdauvergne@entrouvert.com>\n"
 "Language-Team: None\n"
 "Language: fr\n"
@@ -15,31 +15,57 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n>1;\n"
 
-#: templates/mellon/authentication_failed.html:7
-msgid "Authentication failed"
-msgstr "Échec de l'authentification"
+#: models.py:8
+msgid "user"
+msgstr "utilisateur"
 
-#: templates/mellon/authentication_failed.html:9
-#, python-format
-msgid ""
-"The authentication has failed, you can return to\n"
-"    the <a href=\"%(next_url)s\">last page</a> you where.\n"
-"    "
-msgstr ""
-"L'authentification a échoué, vous pouvez retourner à <a href=\"%(next_url)s"
-"\">la dernière page</a> atteinte."
-
-#: templates/mellon/authentication_failed.html:14
+#: models.py:12 templates/mellon/authentication_failed.html:22
 msgid "Issuer"
 msgstr "Émetteur"
 
-#: templates/mellon/authentication_failed.html:17
+#: models.py:14
+msgid "SAML identifier"
+msgstr "Identifiant SAML"
+
+#: models.py:16
+msgid "created"
+msgstr "création"
+
+#: models.py:20
+msgid "user SAML identifier"
+msgstr "Identifiant SAML d'un usager"
+
+#: models.py:21
+msgid "users SAML identifiers"
+msgstr "Identifiants SAML des usagers"
+
+#: templates/mellon/authentication_failed.html:12
+msgid "Authentication failed"
+msgstr "Échec de l'authentification"
+
+#: templates/mellon/authentication_failed.html:14
+msgid "The authentication has failed."
+msgstr "L'authentification a échoué."
+
+#: templates/mellon/authentication_failed.html:15
+msgid "Reason"
+msgstr "Raison"
+
+#: templates/mellon/authentication_failed.html:18
+msgid "Continue"
+msgstr "Continuer"
+
+#: templates/mellon/authentication_failed.html:25
 msgid "Message"
 msgstr "Message"
 
-#: templates/mellon/authentication_failed.html:20
+#: templates/mellon/authentication_failed.html:29
 msgid "Codes"
 msgstr "Codes"
+
+#: templates/mellon/authentication_failed.html:33
+msgid "Relaystate"
+msgstr "Information d'état (relaystate)"
 
 #: templates/mellon/inactive_user.html:6
 #, python-format
@@ -55,3 +81,15 @@ msgstr ""
 #, python-format
 msgid "No user found for NameID %(name_id)s"
 msgstr "Aucun utilisateur trouvé pour l'identifiant SAML %(name_id)s"
+
+#: views.py:264
+msgid "IdP is temporarily down, please try again later."
+msgstr "Le fournisseur d'identités est temporairement inaccessible, veuillez réessayer plus tard."
+
+#~ msgid ""
+#~ "The authentication has failed, you can return to\n"
+#~ "    the <a href=\"%(next_url)s\">last page</a> you where.\n"
+#~ "    "
+#~ msgstr ""
+#~ "L'authentification a échoué, vous pouvez retourner à <a href="
+#~ "\"%(next_url)s\">la dernière page</a> atteinte."
