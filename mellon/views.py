@@ -102,6 +102,7 @@ class LoginView(ProfileMixin, LogMixin, View):
             return self.get(request, *args, **kwargs)
         if not utils.is_nonnull(request.POST['SAMLResponse']):
             return HttpResponseBadRequest('SAMLResponse contains a null character')
+        self.log.info('Got SAML Response', extra={'saml_response': request.POST['SAMLResponse']})
         self.profile = login = utils.create_login(request)
         idp_message = None
         status_codes = []
@@ -268,6 +269,7 @@ class LoginView(ProfileMixin, LogMixin, View):
                              result.status_code, result.content)
             return self.sso_failure(request, login, idp_message, status_codes)
 
+        self.log.info('Got SAML Artifact Response', extra={'saml_response': result.content})
         try:
             login.processResponseMsg(result.content)
             login.acceptSso()

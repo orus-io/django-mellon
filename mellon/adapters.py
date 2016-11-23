@@ -145,6 +145,8 @@ class DefaultAdapter(object):
             else:
                 user.delete()
                 user = saml_id.user
+                self.logger.info('looked up user %s with name_id %s from issuer %s',
+                                 user, name_id, issuer)
         return user
 
     def provision(self, user, idp, saml_attributes):
