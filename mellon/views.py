@@ -192,7 +192,7 @@ class LoginView(ProfileMixin, LogMixin, View):
         next_url = self.get_next_url(default=resolve_url(settings.LOGIN_REDIRECT_URL))
         if user is not None:
             if user.is_active:
-                auth.login(request, user)
+                utils.login(request, user)
                 self.log.info('user %r (NameID is %r) logged in using SAML', unicode(user),
                               attributes['name_id_content'])
                 request.session['mellon_session'] = utils.flatten_datetime(attributes)

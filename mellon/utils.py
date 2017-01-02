@@ -4,6 +4,7 @@ import importlib
 from functools import wraps
 import isodate
 
+from django.contrib import auth
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from django.utils.timezone import make_aware, now, make_naive, is_aware, get_default_timezone
@@ -237,3 +238,11 @@ def get_status_codes_and_message(profile):
     if status.statusMessage:
         message = status.statusMessage.decode('utf-8')
     return status_codes, message
+
+def login(request, user):
+    for adapter in get_adapters():
+        if hasattr(adapter, 'auth_login'):
+            adapter.auth_login(request, user)
+            break
+    else:
+        auth.login(request, user)
