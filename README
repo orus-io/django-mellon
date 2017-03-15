@@ -35,17 +35,17 @@ If SAML 2.0 should be your only authentication method you can define `mellon_log
     LOGIN_URL = 'mellon_login'
     LOGOUT_URL = 'mellon_logout'
 
-Yout metadata will be downloadable through HTTP on 
+Your metadata will be downloadable through HTTP on 
 
-    http://youapplication/base/accounts/mellon/metadata
+    http://whatever.example.net/accounts/mellon/metadata
 
 If your identity provider ask for your assertion consumer URL it's on
 
-    http://youapplication/base/accounts/mellon/login
+    http://whatever.example.net/accounts/mellon/login
 
 If your identity provider ask for your logout URL it's on
 
-    http://youapplication/base/accounts/mellon/logout
+    http://whatever.example.net/accounts/mellon/logout
 
 Session
 =======
