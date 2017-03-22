@@ -19,7 +19,7 @@ pytestmark = pytest.mark.django_db
 
 
 def test_null_character_on_samlresponse_post(app):
-    app.post(reverse('mellon_login'), {'SAMLResponse': '\x00'}, status=400)
+    app.post(reverse('mellon_login'), params={'SAMLResponse': '\x00'}, status=400)
 
 
 def test_metadata(private_settings, client):

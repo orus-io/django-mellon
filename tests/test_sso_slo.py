@@ -107,7 +107,7 @@ def test_sso_slo(db, app, idp, caplog, sp_settings):
     response = app.get(reverse('mellon_login'))
     url, body = idp.process_authn_request_redirect(response['Location'])
     assert url.endswith(reverse('mellon_login'))
-    response = app.post(reverse('mellon_login'), {'SAMLResponse': body})
+    response = app.post(reverse('mellon_login'), params={'SAMLResponse': body})
     assert 'created new user' in caplog.text()
     assert 'logged in using SAML' in caplog.text()
     assert response['Location'].endswith(sp_settings.LOGIN_REDIRECT_URL)
@@ -117,7 +117,7 @@ def test_sso(db, app, idp, caplog, sp_settings):
     response = app.get(reverse('mellon_login'))
     url, body = idp.process_authn_request_redirect(response['Location'])
     assert url.endswith(reverse('mellon_login'))
-    response = app.post(reverse('mellon_login'), {'SAMLResponse': body})
+    response = app.post(reverse('mellon_login'), params={'SAMLResponse': body})
     assert 'created new user' in caplog.text()
     assert 'logged in using SAML' in caplog.text()
     assert response['Location'].endswith(sp_settings.LOGIN_REDIRECT_URL)
@@ -127,7 +127,7 @@ def test_sso_request_denied(db, app, idp, caplog, sp_settings):
     response = app.get(reverse('mellon_login'))
     url, body = idp.process_authn_request_redirect(response['Location'], auth_result=False)
     assert url.endswith(reverse('mellon_login'))
-    response = app.post(reverse('mellon_login'), {'SAMLResponse': body})
+    response = app.post(reverse('mellon_login'), params={'SAMLResponse': body})
     assert "status is not success codes: [u'urn:oasis:names:tc:SAML:2.0:status:Responder',\
  u'urn:oasis:names:tc:SAML:2.0:status:RequestDenied']" in caplog.text()
 
