@@ -89,11 +89,11 @@ def test_provision_user_attributes(settings, django_user_model, caplog):
     assert user.email == 'test@example.net'
     assert user.is_superuser is False
     assert user.is_staff is False
-    assert len(caplog.records()) == 4
-    assert 'created new user' in caplog.text()
-    assert 'set field first_name' in caplog.text()
-    assert 'set field last_name' in caplog.text()
-    assert 'set field email' in caplog.text()
+    assert len(caplog.records) == 4
+    assert 'created new user' in caplog.text
+    assert 'set field first_name' in caplog.text
+    assert 'set field last_name' in caplog.text
+    assert 'set field email' in caplog.text
 
 
 def test_provision_user_groups(settings, django_user_model, caplog):
@@ -102,18 +102,18 @@ def test_provision_user_groups(settings, django_user_model, caplog):
     user = SAMLBackend().authenticate(saml_attributes=saml_attributes)
     assert user.groups.count() == 3
     assert set(user.groups.values_list('name', flat=True)) == set(saml_attributes['group'])
-    assert len(caplog.records()) == 4
-    assert 'created new user' in caplog.text()
-    assert 'adding group GroupA' in caplog.text()
-    assert 'adding group GroupB' in caplog.text()
-    assert 'adding group GroupC' in caplog.text()
+    assert len(caplog.records) == 4
+    assert 'created new user' in caplog.text
+    assert 'adding group GroupA' in caplog.text
+    assert 'adding group GroupB' in caplog.text
+    assert 'adding group GroupC' in caplog.text
     saml_attributes2 = saml_attributes.copy()
     saml_attributes2['group'] = ['GroupB', 'GroupC']
     user = SAMLBackend().authenticate(saml_attributes=saml_attributes2)
     assert user.groups.count() == 2
     assert set(user.groups.values_list('name', flat=True)) == set(saml_attributes2['group'])
-    assert len(caplog.records()) == 5
-    assert 'removing group GroupA' in caplog.records()[-1].message
+    assert len(caplog.records) == 5
+    assert 'removing group GroupA' in caplog.records[-1].message
 
 
 def test_provision_is_superuser(settings, django_user_model, caplog):
@@ -124,11 +124,11 @@ def test_provision_is_superuser(settings, django_user_model, caplog):
     user = SAMLBackend().authenticate(saml_attributes=saml_attributes)
     assert user.is_superuser is True
     assert user.is_staff is True
-    assert 'flag is_staff and is_superuser added' in caplog.text()
+    assert 'flag is_staff and is_superuser added' in caplog.text
     user = SAMLBackend().authenticate(saml_attributes=saml_attributes)
     assert user.is_superuser is True
     assert user.is_staff is True
-    assert not 'flag is_staff and is_superuser removed' in caplog.text()
+    assert not 'flag is_staff and is_superuser removed' in caplog.text
 
 
 def test_provision_absent_attribute(settings, django_user_model, caplog):
@@ -142,11 +142,11 @@ def test_provision_absent_attribute(settings, django_user_model, caplog):
     del local_saml_attributes['email']
     user = SAMLBackend().authenticate(saml_attributes=local_saml_attributes)
     assert not user.email
-    assert len(caplog.records()) == 4
-    assert 'created new user' in caplog.text()
-    assert re.search(r'invalid reference.*email', caplog.text())
-    assert 'set field first_name' in caplog.text()
-    assert 'set field last_name' in caplog.text()
+    assert len(caplog.records) == 4
+    assert 'created new user' in caplog.text
+    assert re.search(r'invalid reference.*email', caplog.text)
+    assert 'set field first_name' in caplog.text
+    assert 'set field last_name' in caplog.text
 
 
 def test_provision_long_attribute(settings, django_user_model, caplog):
@@ -160,12 +160,12 @@ def test_provision_long_attribute(settings, django_user_model, caplog):
     local_saml_attributes['first_name'] = [('y' * 32)]
     user = SAMLBackend().authenticate(saml_attributes=local_saml_attributes)
     assert user.first_name == 'y' * 30
-    assert len(caplog.records()) == 4
-    assert 'created new user' in caplog.text()
-    assert 'set field first_name' in caplog.text()
-    assert 'to value %r ' % (u'y' * 30) in caplog.text()
-    assert 'set field last_name' in caplog.text()
-    assert 'set field email' in caplog.text()
+    assert len(caplog.records) == 4
+    assert 'created new user' in caplog.text
+    assert 'set field first_name' in caplog.text
+    assert 'to value %r ' % (u'y' * 30) in caplog.text
+    assert 'set field last_name' in caplog.text
+    assert 'set field email' in caplog.text
 
 
 def test_lookup_user_transient_with_email(private_settings):

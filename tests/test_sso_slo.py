@@ -108,8 +108,8 @@ def test_sso_slo(db, app, idp, caplog, sp_settings):
     url, body = idp.process_authn_request_redirect(response['Location'])
     assert url.endswith(reverse('mellon_login'))
     response = app.post(reverse('mellon_login'), params={'SAMLResponse': body})
-    assert 'created new user' in caplog.text()
-    assert 'logged in using SAML' in caplog.text()
+    assert 'created new user' in caplog.text
+    assert 'logged in using SAML' in caplog.text
     assert response['Location'].endswith(sp_settings.LOGIN_REDIRECT_URL)
 
 
@@ -118,8 +118,8 @@ def test_sso(db, app, idp, caplog, sp_settings):
     url, body = idp.process_authn_request_redirect(response['Location'])
     assert url.endswith(reverse('mellon_login'))
     response = app.post(reverse('mellon_login'), params={'SAMLResponse': body})
-    assert 'created new user' in caplog.text()
-    assert 'logged in using SAML' in caplog.text()
+    assert 'created new user' in caplog.text
+    assert 'logged in using SAML' in caplog.text
     assert response['Location'].endswith(sp_settings.LOGIN_REDIRECT_URL)
 
 
@@ -129,7 +129,7 @@ def test_sso_request_denied(db, app, idp, caplog, sp_settings):
     assert url.endswith(reverse('mellon_login'))
     response = app.post(reverse('mellon_login'), params={'SAMLResponse': body})
     assert "status is not success codes: [u'urn:oasis:names:tc:SAML:2.0:status:Responder',\
- u'urn:oasis:names:tc:SAML:2.0:status:RequestDenied']" in caplog.text()
+ u'urn:oasis:names:tc:SAML:2.0:status:RequestDenied']" in caplog.text
 
 
 def test_sso_artifact(db, app, caplog, sp_settings, idp_metadata, idp_private_key, rf):
@@ -145,29 +145,29 @@ def test_sso_artifact(db, app, caplog, sp_settings, idp_metadata, idp_private_ke
     acs_artifact_url = url.split('testserver', 1)[1]
     with HTTMock(idp.mock_artifact_resolver()):
         response = app.get(acs_artifact_url)
-    assert 'created new user' in caplog.text()
-    assert 'logged in using SAML' in caplog.text()
+    assert 'created new user' in caplog.text
+    assert 'logged in using SAML' in caplog.text
     assert response['Location'].endswith(sp_settings.LOGIN_REDIRECT_URL)
     # force delog
     app.session.flush()
-    assert 'dead artifact' not in caplog.text()
+    assert 'dead artifact' not in caplog.text
     with HTTMock(idp.mock_artifact_resolver()):
         response = app.get(acs_artifact_url)
     # verify retry login was asked
-    assert 'dead artifact' in caplog.text()
+    assert 'dead artifact' in caplog.text
     assert response.status_code == 302
     assert reverse('mellon_login') in url
     response = response.follow()
     url, body = idp.process_authn_request_redirect(response['Location'])
     reset_caplog(caplog)
     # verify caplog has been cleaned
-    assert 'created new user' not in caplog.text()
+    assert 'created new user' not in caplog.text
     assert body is None
     assert reverse('mellon_login') in url
     assert 'SAMLart' in url
     acs_artifact_url = url.split('testserver', 1)[1]
     with HTTMock(idp.mock_artifact_resolver()):
         response = app.get(acs_artifact_url)
-    assert 'created new user' in caplog.text()
-    assert 'logged in using SAML' in caplog.text()
+    assert 'created new user' in caplog.text
+    assert 'logged in using SAML' in caplog.text
     assert response['Location'].endswith(sp_settings.LOGIN_REDIRECT_URL)

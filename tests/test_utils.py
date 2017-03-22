@@ -23,7 +23,7 @@ def test_create_server_connection_error(mocker, rf, private_settings, caplog):
     ]
     request = rf.get('/')
     create_server(request)
-    assert 'connection error' in caplog.text()
+    assert 'connection error' in caplog.text
 
 
 def test_create_server_internal_server_error(mocker, rf, private_settings, caplog):
@@ -33,10 +33,10 @@ def test_create_server_internal_server_error(mocker, rf, private_settings, caplo
         }
     ]
     request = rf.get('/')
-    assert not 'failed with error' in caplog.text()
+    assert not 'failed with error' in caplog.text
     with HTTMock(error_500):
         create_server(request)
-    assert 'failed with error' in caplog.text()
+    assert 'failed with error' in caplog.text
 
 
 def test_create_server_invalid_metadata(mocker, rf, private_settings, caplog):
@@ -46,11 +46,11 @@ def test_create_server_invalid_metadata(mocker, rf, private_settings, caplog):
         }
     ]
     request = rf.get('/')
-    assert not 'failed with error' in caplog.text()
+    assert not 'failed with error' in caplog.text
     with HTTMock(error_500):
         create_server(request)
-    assert len(caplog.records()) == 1
-    assert re.search('METADATA.*is invalid', caplog.text())
+    assert len(caplog.records) == 1
+    assert re.search('METADATA.*is invalid', caplog.text)
 
 
 def test_create_server_invalid_metadata_file(mocker, rf, private_settings, caplog):
@@ -60,7 +60,7 @@ def test_create_server_invalid_metadata_file(mocker, rf, private_settings, caplo
         }
     ]
     request = rf.get('/')
-    assert not 'failed with error' in caplog.text()
+    assert not 'failed with error' in caplog.text
     with mock.patch('mellon.adapters.file', mock.mock_open(read_data='yyy'), create=True):
         with HTTMock(error_500):
             server = create_server(request)
@@ -78,7 +78,7 @@ def test_create_server_good_metadata_file(mocker, rf, private_settings, caplog):
         'mellon.adapters.file', mock.mock_open(read_data=file('tests/metadata.xml').read()),
             create=True):
         server = create_server(request)
-    assert 'ERROR' not in caplog.text()
+    assert 'ERROR' not in caplog.text
     assert len(server.providers) == 1
 
 
@@ -89,9 +89,9 @@ def test_create_server_good_metadata(mocker, rf, private_settings, caplog):
         }
     ]
     request = rf.get('/')
-    assert not 'failed with error' in caplog.text()
+    assert not 'failed with error' in caplog.text
     server = create_server(request)
-    assert 'ERROR' not in caplog.text()
+    assert 'ERROR' not in caplog.text
     assert len(server.providers) == 1
 
 
@@ -101,9 +101,9 @@ def test_create_server_invalid_idp_dict(mocker, rf, private_settings, caplog):
         }
     ]
     request = rf.get('/')
-    assert not 'failed with error' in caplog.text()
+    assert not 'failed with error' in caplog.text
     create_server(request)
-    assert 'missing METADATA' in caplog.text()
+    assert 'missing METADATA' in caplog.text
 
 
 def test_create_server_good_metadata_url(mocker, rf, private_settings, caplog):
@@ -114,10 +114,10 @@ def test_create_server_good_metadata_url(mocker, rf, private_settings, caplog):
     ]
 
     request = rf.get('/')
-    assert not 'failed with error' in caplog.text()
+    assert not 'failed with error' in caplog.text
     with HTTMock(metadata_response):
         server = create_server(request)
-    assert 'ERROR' not in caplog.text()
+    assert 'ERROR' not in caplog.text
     assert len(server.providers) == 1
 
 

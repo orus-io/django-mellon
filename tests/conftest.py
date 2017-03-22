@@ -38,7 +38,7 @@ def private_settings(request):
 @pytest.fixture
 def caplog(caplog):
     import py.io
-    caplog.setLevel(logging.INFO)
+    caplog.set_level(logging.INFO)
     caplog.handler.stream = py.io.TextIO()
     caplog.handler.records = []
     return caplog

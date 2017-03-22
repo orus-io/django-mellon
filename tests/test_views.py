@@ -220,7 +220,7 @@ def test_malfortmed_artifact(private_settings, client, caplog):
     }]
     response = client.get('/login/?SAMLart=xxx', status=400)
     assert 'artifact is malformed' in response.content
-    assert 'artifact is malformed' in caplog.text()
+    assert 'artifact is malformed' in caplog.text
 
 
 @pytest.fixture
@@ -236,7 +236,7 @@ def test_error_500_on_artifact_resolve(private_settings, client, caplog, artifac
     }]
     with HTTMock(error_500):
         client.get('/login/?SAMLart=%s' % artifact)
-    assert 'IdP returned 500' in caplog.text()
+    assert 'IdP returned 500' in caplog.text
 
 
 def test_invalid_msg_on_artifact_resolve(private_settings, client, caplog, artifact):
@@ -245,4 +245,4 @@ def test_invalid_msg_on_artifact_resolve(private_settings, client, caplog, artif
     }]
     with HTTMock(html_response):
         client.get('/login/?SAMLart=%s' % artifact)
-    assert 'ArtifactResolveResponse is malformed' in caplog.text()
+    assert 'ArtifactResolveResponse is malformed' in caplog.text
