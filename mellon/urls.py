@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 import django
 
 from . import views
@@ -12,5 +12,6 @@ urlpatterns = [
     url('metadata/$', views.metadata,
         name='mellon_metadata')
 ]
-if django.VERSION < (1, 9):
+if django.VERSION < (1, 8):
+    from django.conf.urls import patterns
     urlpatterns = patterns('', *urlpatterns)
