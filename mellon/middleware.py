@@ -35,7 +35,7 @@ class PassiveAuthenticationMiddleware(object):
             # get the common domain or guess
             common_domain = app_settings.OPENED_SESSION_COOKIE_DOMAIN
             if not common_domain:
-                common_domain = request.META['SERVER_NAME'].split('.', 1)[1]
+                common_domain = request.get_host().split('.', 1)[1]
                 assert '.' in common_domain  # if domain is xxx.com explode !
             params = {
                 'next': request.build_absolute_uri(),
