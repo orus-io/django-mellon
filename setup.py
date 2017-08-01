@@ -43,7 +43,7 @@ class eo_sdist(_sdist):
     sub_commands = [('compile_translations', None)] + _build.sub_commands
 
     def run(self):
-        print "creating VERSION file"
+        print("creating VERSION file")
         if os.path.exists('VERSION'):
             os.remove('VERSION')
         version = get_version()
@@ -51,7 +51,7 @@ class eo_sdist(_sdist):
         version_file.write(version)
         version_file.close()
         _sdist.run(self)
-        print "removing VERSION file"
+        print("removing VERSION file")
         if os.path.exists('VERSION'):
             os.remove('VERSION')
 
@@ -74,7 +74,7 @@ def get_version():
                              stderr=subprocess.PIPE)
         result = p.communicate()[0]
         if p.returncode == 0:
-            return result.split()[0][1:].replace('-', '.')
+            return result.decode('ascii').split()[0][1:].replace('-', '.')
         else:
             return '0.0.0-%s' % len(subprocess.check_output(
                 ['git', 'rev-list', 'HEAD']).splitlines())
@@ -84,7 +84,7 @@ setup(name="django-mellon",
       version=get_version(),
       license="AGPLv3 or later",
       description="SAML 2.0 authentication for Django",
-      long_description=file('README').read(),
+      long_description=open('README').read(),
       url="http://dev.entrouvert.org/projects/django-mellon/",
       author="Entr'ouvert",
       author_email="info@entrouvert.org",
