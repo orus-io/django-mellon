@@ -260,6 +260,7 @@ class LoginView(ProfileMixin, LogMixin, View):
         try:
             result = requests.post(login.msgUrl, data=login.msgBody,
                                    headers={'content-type': 'text/xml'},
+                                   timeout=app_settings.ARTIFACT_RESOLVE_TIMEOUT,
                                    verify=verify_ssl_certificate)
         except RequestException, e:
             self.log.warning('unable to reach %r: %s', login.msgUrl, e)
