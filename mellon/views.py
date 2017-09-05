@@ -3,6 +3,7 @@ import requests
 import lasso
 import uuid
 from requests.exceptions import RequestException
+from xml.sax.saxutils import escape
 
 from django.core.urlresolvers import reverse
 from django.views.generic import View
@@ -360,6 +361,15 @@ class LoginView(ProfileMixin, LogMixin, View):
                 req_authncontext = lasso.Samlp2RequestedAuthnContext()
                 authn_request.requestedAuthnContext = req_authncontext
                 req_authncontext.authnContextClassRef = authn_classref
+
+            authn_request.extensions = lasso.Samlp2Extensions()
+            authn_request.extensions.setOriginalXmlnode(
+                    '''<samlp:Extensions
+                            xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+                            xmlns:eo="https://www.entrouvert.com/">
+                          <eo:next_url>%s</eo:next_url>
+                       </samlp:Extensions>''' %
+                   escape(request.build_absolute_uri(next_url or '/')))
             self.set_next_url(next_url)
             login.buildAuthnRequestMsg()
         except lasso.Error, e:
