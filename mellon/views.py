@@ -317,8 +317,7 @@ class LoginView(ProfileMixin, LogMixin, View):
         url = app_settings.DISCOVERY_SERVICE_URL
         params = {
             # prevent redirect loops with the discovery service
-            'nodisco': '1',
-            'return': self_url
+            'return': self_url + '?nodisco=1',
         }
         if is_passive:
             params['isPassive'] = 'true'
