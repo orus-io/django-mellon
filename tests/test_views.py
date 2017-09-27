@@ -140,8 +140,8 @@ def test_sp_initiated_login_discovery_service(private_settings, client):
     assert response.status_code == 302
     params = parse_qs(urlparse(response['Location']).query)
     assert response['Location'].startswith('https://disco?')
-    assert params == {'return': ['http://testserver/login/'],
-                      'nodisco': ['1']}
+    assert params == {'return': ['http://testserver/login/?nodisco=1'],
+                      'entityID': ['http://testserver/metadata/']}
 
 
 def test_sp_initiated_login_discovery_service_passive(private_settings, client):
@@ -151,8 +151,8 @@ def test_sp_initiated_login_discovery_service_passive(private_settings, client):
     params = parse_qs(urlparse(response['Location']).query)
     assert response['Location'].startswith('https://disco?')
     assert params == {'isPassive': ['true'],
-                      'return': ['http://testserver/login/'],
-                      'nodisco': ['1']}
+                      'entityID': ['http://testserver/metadata/'],
+                      'return': ['http://testserver/login/?nodisco=1']}
 
 
 def test_sp_initiated_login_discovery_service_nodisco(private_settings, client):

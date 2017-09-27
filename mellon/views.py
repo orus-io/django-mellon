@@ -317,7 +317,7 @@ class LoginView(ProfileMixin, LogMixin, View):
         url = app_settings.DISCOVERY_SERVICE_URL
         params = {
             # prevent redirect loops with the discovery service
-            'entityID': reverse('mellon_metadata'),
+            'entityID': request.build_absolute_uri(reverse('mellon_metadata')),
             'return': self_url + '?nodisco=1',
         }
         if is_passive:
