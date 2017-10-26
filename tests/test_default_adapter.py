@@ -1,7 +1,7 @@
-import threading
 import pytest
 import re
 import lasso
+from multiprocessing.pool import ThreadPool
 
 from django.contrib import auth
 from django.db import connection
@@ -57,20 +57,19 @@ def test_lookup_user(settings):
 
 def test_lookup_user_transaction(transactional_db, concurrency):
     adapter = DefaultAdapter()
-
-    def map_threads(f, l):
-        threads = []
-        for i in l:
-            threads.append(threading.Thread(target=f, args=(i,)))
-            threads[-1].start()
-        for thread in threads:
-            thread.join()
-    users = []
+    p = ThreadPool(concurrency)
 
     def f(i):
-        users.append(adapter.lookup_user(idp, saml_attributes))
-        connection.close()
-    map_threads(f, range(concurrency))
+        # sqlite has a default lock timeout of 5s seconds between different access to the same in
+        # memory DB
+        if connection.vendor == 'sqlite':
+            connection.cursor().execute('PRAGMA busy_timeout = 400000')
+        try:
+            return adapter.lookup_user(idp, saml_attributes)
+        finally:
+            connection.close()
+    users = p.map(f, range(concurrency))
+
     assert len(users) == concurrency
     assert len(set(user.pk for user in users)) == 1
 
