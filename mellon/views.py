@@ -342,9 +342,9 @@ class LoginView(ProfileMixin, LogMixin, View):
         if idp is None:
             return HttpResponseBadRequest('no idp found')
         self.profile = login = utils.create_login(request)
-        self.log.debug('authenticating to %r', idp['ENTITY_ID'])
+        self.log.debug('authenticating to %r', idp.get('ENTITY_ID') or idp['METADATA'])
         try:
-            login.initAuthnRequest(idp['ENTITY_ID'], lasso.HTTP_METHOD_REDIRECT)
+            login.initAuthnRequest(idp.get('ENTITY_ID'), lasso.HTTP_METHOD_REDIRECT)
             authn_request = login.request
             # configure NameID policy
             policy = authn_request.nameIdPolicy

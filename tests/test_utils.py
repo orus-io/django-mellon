@@ -1,3 +1,4 @@
+import os
 import re
 import datetime
 
@@ -6,11 +7,13 @@ import lasso
 import requests.exceptions
 from httmock import HTTMock
 
-from mellon.utils import create_server, create_metadata, iso8601_to_datetime, flatten_datetime
+from mellon.utils import create_server, create_metadata, iso8601_to_datetime, \
+        flatten_datetime, get_idp
 import mellon.utils
 from xml_utils import assert_xml_constraints
 
-from utils import error_500, metadata_response
+from utils import error_500, metadata_response, sample_federation_response, \
+        html_response, dummy_md_response
 
 
 def test_create_server_connection_error(mocker, rf, private_settings, caplog):
@@ -39,6 +42,48 @@ def test_create_server_internal_server_error(mocker, rf, private_settings, caplo
     assert 'failed with error' in caplog.text
 
 
+def test_load_federation_file(mocker, rf, private_settings, caplog, tmpdir):
+    private_settings.MELLON_FEDERATIONS = [
+            {'FEDERATION': 'tests/federation-sample.xml'},
+    ]
+    request = rf.get('/')
+    assert 'failed with error' not in caplog.text
+    with HTTMock(html_response):
+        server = create_server(request)
+    assert len(server.providers) == 5
+
+
+def test_load_federation_url(mocker, rf, private_settings, caplog, tmpdir):
+    private_settings.MELLON_FEDERATIONS = [
+            {'FEDERATION': 'https://dummy.server/metadata.xml'},
+    ]
+    request = rf.get('/')
+    assert 'failed with error' not in caplog.text
+    with HTTMock(dummy_md_response):
+        server = create_server(request)
+    assert len(server.providers) == 3
+
+
+def test_federation_parameters(mocker, rf, private_settings, caplog, tmpdir):
+    private_settings.MELLON_FEDERATIONS = [{
+            'FEDERATION': 'tests/federation-sample.xml',
+            'VERIFY_SSL_CERTIFICATE': False,
+            'ERROR_REDIRECT_AFTER_TIMEOUT': 150,
+            'PROVISION': True
+    }]
+    request = rf.get('/')
+    assert 'failed with error' not in caplog.text
+    with HTTMock(html_response):
+        server = create_server(request)
+    assert len(server.providers) == 5
+    for entity_id in server.providers.keys():
+        idp = get_idp(entity_id)
+        assert idp
+        assert idp['VERIFY_SSL_CERTIFICATE'] is False
+        assert idp['ERROR_REDIRECT_AFTER_TIMEOUT'] == 150
+        assert idp['PROVISION'] is True
+
+
 def test_create_server_invalid_metadata(mocker, rf, private_settings, caplog):
     private_settings.MELLON_IDENTITY_PROVIDERS = [
         {
@@ -49,8 +94,8 @@ def test_create_server_invalid_metadata(mocker, rf, private_settings, caplog):
     assert not 'failed with error' in caplog.text
     with HTTMock(error_500):
         create_server(request)
-    assert len(caplog.records) == 1
-    assert re.search('METADATA.*is invalid', caplog.text)
+    assert len(caplog.records) == 5
+    assert re.search('METADATA.*is invalid|bad metadata in idp', caplog.text)
 
 
 def test_create_server_invalid_metadata_file(mocker, rf, private_settings, caplog):
@@ -70,13 +115,11 @@ def test_create_server_invalid_metadata_file(mocker, rf, private_settings, caplo
 def test_create_server_good_metadata_file(mocker, rf, private_settings, caplog):
     private_settings.MELLON_IDENTITY_PROVIDERS = [
         {
-            'METADATA': '/xxx',
+            'METADATA': './tests/metadata.xml',
         }
     ]
     request = rf.get('/')
-    with mock.patch(
-        'mellon.adapters.file', mock.mock_open(read_data=file('tests/metadata.xml').read()),
-            create=True):
+    with HTTMock(html_response):
         server = create_server(request)
     assert 'ERROR' not in caplog.text
     assert len(server.providers) == 1

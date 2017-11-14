@@ -5,14 +5,18 @@ from functools import wraps
 import isodate
 
 from django.contrib import auth
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
+from django.core.validators import URLValidator
 from django.template.loader import render_to_string
+from django.utils.text import slugify
 from django.utils.timezone import make_aware, now, make_naive, is_aware, get_default_timezone
 from django.conf import settings
 from django.utils.six.moves.urllib.parse import urlparse
 import lasso
 
 from . import app_settings
+from federation_utils import get_federation_from_url, idp_metadata_is_file
 
 
 def create_metadata(request):
@@ -48,44 +52,71 @@ SERVERS = {}
 def create_server(request):
     logger = logging.getLogger(__name__)
     root = request.build_absolute_uri('/')
-    cache = getattr(settings, '_MELLON_SERVER_CACHE', {})
-    if root not in cache:
-        metadata = create_metadata(request)
-        if app_settings.PRIVATE_KEY:
-            private_key = app_settings.PRIVATE_KEY
-            private_key_password = app_settings.PRIVATE_KEY_PASSWORD
-        elif app_settings.PRIVATE_KEYS:
-            private_key = app_settings.PRIVATE_KEYS[0]
-            private_key_password = None
-            if isinstance(private_key, (tuple, list)):
-                private_key_password = private_key[1]
-                private_key = private_key[0]
-        else:  # no signature
-            private_key = None
-            private_key_password = None
-        server = lasso.Server.newFromBuffers(metadata, private_key_content=private_key,
-                                             private_key_password=private_key_password)
-        server.setEncryptionPrivateKeyWithPassword(private_key, private_key_password)
-        private_keys = app_settings.PRIVATE_KEYS
-        # skip first key if it is already loaded
-        if not app_settings.PRIVATE_KEY:
-            private_keys = app_settings.PRIVATE_KEYS[1:]
-        for key in private_keys:
-            password = None
-            if isinstance(key, (tuple, list)):
-                password = key[1]
-                key = key[0]
-            server.setEncryptionPrivateKeyWithPassword(key, password)
-        for idp in get_idps():
-            try:
-                server.addProviderFromBuffer(lasso.PROVIDER_ROLE_IDP, idp['METADATA'])
-            except lasso.Error as e:
-                logger.error(u'bad metadata in idp %r', idp['ENTITY_ID'])
-                logger.debug(u'lasso error: %s', e)
-                continue
-        cache[root] = server
-        settings._MELLON_SERVER_CACHE = cache
-    return settings._MELLON_SERVER_CACHE.get(root)
+    metadata = create_metadata(request)
+    if app_settings.PRIVATE_KEY:
+        private_key = app_settings.PRIVATE_KEY
+        private_key_password = app_settings.PRIVATE_KEY_PASSWORD
+    elif app_settings.PRIVATE_KEYS:
+        private_key = app_settings.PRIVATE_KEYS[0]
+        private_key_password = None
+        if isinstance(private_key, (tuple, list)):
+            private_key_password = private_key[1]
+            private_key = private_key[0]
+    else:  # no signature
+        private_key = None
+        private_key_password = None
+    server = lasso.Server.newFromBuffers(metadata, private_key_content=private_key,
+                                         private_key_password=private_key_password)
+    server.setEncryptionPrivateKeyWithPassword(private_key, private_key_password)
+    private_keys = app_settings.PRIVATE_KEYS
+    # skip first key if it is already loaded
+    if not app_settings.PRIVATE_KEY:
+        private_keys = app_settings.PRIVATE_KEYS[1:]
+    for key in private_keys:
+        password = None
+        if isinstance(key, (tuple, list)):
+            password = key[1]
+            key = key[0]
+        server.setEncryptionPrivateKeyWithPassword(key, password)
+    for idp in get_idps():
+        try:
+            metadata = idp.get('METADATA')
+            if idp_metadata_is_file(metadata):
+                with open(metadata, 'r') as f:
+                    metadata = f.read()
+            server.addProviderFromBuffer(lasso.PROVIDER_ROLE_IDP, metadata)
+        except lasso.Error, e:
+            logger.error(u'bad metadata in idp %r', idp)
+            logger.debug(u'lasso error: %s', e)
+        except IOError, e:
+            logger.warning('No such metadata file: %r', metadata)
+            continue
+    return server
+
+
+def get_federation_metadata(federation):
+    logger = logging.getLogger(__name__)
+    fedmd = None
+    pemcert = None
+    if (isinstance(federation, tuple) and len(federation) == 2):
+        logger.info('Loading local cert-based federation %r',
+                    federation)
+        if federation[1].endswith('.pem'):
+            fedmd = federation[0]
+            pemcert = federation[1]
+    else:
+        urlval = URLValidator()
+        try:
+            urlval(federation)
+        except ValidationError as e:
+            logger.info('Loading file-based federation %s',
+                        federation)
+            fedmd = federation
+        else:
+            logger.info('Fetching and loading url-based federation %s',
+                        federation)
+            fedmd = get_federation_from_url(federation)
+    return (fedmd, pemcert)
 
 
 def create_login(request):
@@ -110,6 +141,13 @@ def get_idps():
         if hasattr(adapter, 'get_idps'):
             for idp in adapter.get_idps():
                 yield idp
+
+
+def get_federations():
+    for adapter in get_adapters():
+        if hasattr(adapter, 'get_federations'):
+            for federation in adapter.get_federations():
+                yield federation
 
 
 def flatten_datetime(d):

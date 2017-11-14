@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><md:EntitiesDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:mdattr="urn:oasis:names:tc:SAML:metadata:attribute" xmlns:mdrpi="urn:oasis:names:tc:SAML:metadata:rpi" xmlns:mdui="urn:oasis:names:tc:SAML:metadata:ui" xmlns:pyff="http://pyff.io/NS" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:shibmd="urn:mace:shibboleth:metadata:1.0" xmlns:xrd="http://docs.oasis-open.org/ns/xri/xrd-1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="_20171018T113001Z" Name="https://federation.renater.fr/" cacheDuration="PT1H" validUntil="2017-10-27T11:30:01Z"><ds:Signature>
+<ds:SignedInfo>
+<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+<ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+<ds:Reference URI="">
+<ds:Transforms>
+<ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+</ds:Transforms>
+<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+<ds:DigestValue>JKdLdd5yGvkFdb1fCAByMMnurIKYhZepRouZfOjIUrg=</ds:DigestValue>
+</ds:Reference>
+</ds:SignedInfo>
+<ds:SignatureValue>
+OTexfi8c63TsP1V9j5m6digA2NomUfqBtT8pPKhwdqEDQS5qLh6fxvT+wWkP6JaIhkP8nxwpbArl
+7cUHkRv5ibZzcknIAjXYMhsSTtFQUq89OMcDHtZHG54jiKyHPhu2+XEbvv6DsAYanYC6SHEnGjNG
+opnOEUB2XqeycsvvTQQIuWZEoABTVcKYyk2CW7Ij5EUmPOAPiidtbt8lzrtkV6dwLbkyoEbChAyj
+emrL/oS01aJgT9sQoJxR8lyRMGiZ/BwQqYTareiKwOXLPdGThzsfZXD8de9T1xuysILaAM7sHPJV
+QfrQJm80Zo2MM/GnhJTO9rc4m3kRnRhqmA6qMw==
+</ds:SignatureValue>
+<ds:KeyInfo>
+<ds:KeyValue>
+<ds:RSAKeyValue>
+<ds:Modulus>
+71+vTf66BPgYUF7sm4T++W69qMVyGQn9wNqpBLc6sp53eq/JRTOUD26Yehjsld5qN52Bv2r5QG7o
+4VU123akXUYzupvq1f+tmF9NwYa7MPEPFzCzJHhNXjZNRxcsW1WLW34fhQCm0oak3oSPoNo5qeGi
+jNsTSkgSt1mPH0P8d95af2VJnT6zbrclxvH4emqpT9oGLsWqKWLlIbZ7u1PUjuNVwLHuj909/apm
+C13RBIpV52fey4qey34bnRHdCTknZeN/TJLTJ9hMWzz9TbdjfIFaiF7MeY+OYRXzUJeQuHHMu/2I
+emkoR26mYi6irvmx8AdPcPCwcRKw2Ca4xLhbNw==
+</ds:Modulus>
+<ds:Exponent>AQAB</ds:Exponent>
+</ds:RSAKeyValue>
+</ds:KeyValue>
+<ds:X509Data>
+<ds:X509Certificate>
+MIIC9zCCAd+gAwIBAgIEfe6j3jANBgkqhkiG9w0BAQsFADAsMSowKAYDVQQDEyFTQU1MIE1ldGFk
+YXRhIFNpZ25pbmcgQ2VydGlmaWNhdGUwHhcNMTYwNzI5MDczNjM4WhcNMjYwNjA3MDczNjM4WjAs
+MSowKAYDVQQDEyFTQU1MIE1ldGFkYXRhIFNpZ25pbmcgQ2VydGlmaWNhdGUwggEiMA0GCSqGSIb3
+DQEBAQUAA4IBDwAwggEKAoIBAQDvX69N/roE+BhQXuybhP75br2oxXIZCf3A2qkEtzqynnd6r8lF
+M5QPbph6GOyV3mo3nYG/avlAbujhVTXbdqRdRjO6m+rV/62YX03Bhrsw8Q8XMLMkeE1eNk1HFyxb
+VYtbfh+FAKbShqTehI+g2jmp4aKM2xNKSBK3WY8fQ/x33lp/ZUmdPrNutyXG8fh6aqlP2gYuxaop
+YuUhtnu7U9SO41XAse6P3T39qmYLXdEEilXnZ97Lip7LfhudEd0JOSdl439MktMn2ExbPP1Nt2N8
+gVqIXsx5j45hFfNQl5C4ccy7/Yh6aShHbqZiLqKu+bHwB09w8LBxErDYJrjEuFs3AgMBAAGjITAf
+MB0GA1UdDgQWBBTT88iZzWO+hN9SBUkpx871lmTuLTANBgkqhkiG9w0BAQsFAAOCAQEABoPpODry
+XwiM5jjtqk6veR02FevCKHpZP6Od7Kqcfs6lg5LcQmGUOgpmW3Gg4UMjBYkgARsT2Nsnah1CJqa8
+cjvv8p5KEIhY0hVS8iMJnrb3PDeiFSeP4xSfct/6z/ebV4+QFl22bsm2zpAC6BpFz8+IJ/jAmQzT
+Vob4MAUeQPnwwzm3xz6yanLZx7BK5cfrTCa+hrarNQCboRjXPwiejF8WRCxpgRHH6yNs5QH/Z6o5
+e3tUP7uEpn2Ob+kcLsEMGb9DghkoDAgkHCOZeTy+7hgxt+/T94cLTa58gVtvEOnd0GuL7Vfd+IVd
+XgSard8RfR3OyZlf6M4aSGQA73sskQ==
+</ds:X509Certificate>
+</ds:X509Data>
+</ds:KeyInfo>
+</ds:Signature><md:EntityDescriptor entityID="https://aishib.agropolis.fr/idp/shibboleth">
+			<md:Extensions>
+				<mdrpi:RegistrationInfo registrationAuthority="https://federation.renater.fr/" registrationInstant="2013-06-06T11:49:20Z">
+					<mdrpi:RegistrationPolicy xml:lang="en">https://services.renater.fr/federation/en/metadata_registration_practice_statement</mdrpi:RegistrationPolicy>
+				</mdrpi:RegistrationInfo>
+			</md:Extensions>
+		<md:IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:1.1:protocol urn:mace:shibboleth:1.0 urn:oasis:names:tc:SAML:2.0:protocol">
+			<md:Extensions>
+    				<shibmd:Scope regexp="false">agropolis.fr</shibmd:Scope>
+
+			    <mdui:UIInfo>
+
+			      <mdui:DisplayName xml:lang="en">Agropolis International</mdui:DisplayName>
+
+			      <mdui:Logo height="16" width="16">data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAACXBIWXMAAABIAAAASABGyWs+AAAACXZwQWcAAAAQAAAAEABcxq3DAAACPUlEQVQoz21SPW8TQRR8u7d3ju34Er6UCHACRqK4Bjk0oDSEjiYSBQVS8k9AkWgp+AuUASGEaCASkoPcgARVMF8iTnxJwMFJfL47397u3u6jsGVFwLzmFTN6ozdDEBEAAOD4kiRJsVgkhMA/YMfZzc3NVstnzGq1/KXlJfgf2Ii9XquVZ2YWbi5Io4MsbfPeZK4wRm0AOH6KICIivq2tV6/O5cYLHztbW9FvYTKuZaLk7PjpW+UrJXtspCHGmGazCQBnZ8svtj/0tbAINYhcy1DyThpRhHtztyedwkBDAWBnZ6dSqbzZ+7THu0IraTJplDSZ0JnQ2Y+482jj1cgSRUTHdrhW9fa3SKaxErFKIyUiKaIsjVQaKf5s631HxP1+X2vNwjB0J9zd+OgnD044Ra4lI5ZBw7XqyeRQREciaqe9xoE/K/OFfIENnqBM1uZBqlWBOYxQjYZnqieTThru8zCU3AASIAjIXNellGLePkjCUPICy1mEDAShSg7SqCsTBtQ7WfY3vlarVUYpdUsuAs5PXV7dfpe3HEYtjSbNZJwJoRUi3rl4fSrvfufctm0ySA0RD0V84+WDL1EbCCDCYIDApeKZ+uKK6faDIPA8jw7jIORUbry2eH+5Mu8ARTSAkCPW3QvX6osrE+B8bjQ8zxu2aACDaIwxxuzzsLbbePj88a8k0Mb4vr/2ei3LMoOIiGRU0iGGVuDp6pNz5fNSiKnpac/zgAABMuzSXwIggIjdbrdUKjHGYGQaAAD+AJBJecXxnEvWAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDE1LTA3LTIwVDEwOjQ4OjE1KzAyOjAwpWiGMQAAACV0RVh0ZGF0ZTptb2RpZnkAMjAxNS0wNy0yMFQxMDo0ODoxNSswMjowMNQ1Po0AAAAASUVORK5CYII=</mdui:Logo>
+			      <mdui:InformationURL xml:lang="fr">http://www.agropolis.fr</mdui:InformationURL>
+
+          		      <mdui:DisplayName xml:lang="fr">Agropolis International</mdui:DisplayName>
+
+      			    </mdui:UIInfo>
+			</md:Extensions>
+				<md:KeyDescriptor use="signing">
+<ds:KeyInfo>
+
+					  <ds:X509Data>
+					    <ds:X509Certificate>
+					      MIIDNzCCAh+gAwIBAgIUYY3sGXwChkj2CRy6QFDvkdj2zlAwDQYJKoZIhvcNAQEF
+BQAwHjEcMBoGA1UEAxMTYWlzaGliLmFncm9wb2xpcy5mcjAeFw0xMzA1MTUxMzM3
+MTJaFw0zMzA1MTUxMzM3MTJaMB4xHDAaBgNVBAMTE2Fpc2hpYi5hZ3JvcG9saXMu
+ZnIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCxrDy6lrhIBjcxv16n
+4UJ2cEMYPO4wSmfDwhO6feoSIEuIblYRHE2nQKirMokwD6seF4rbDHyxLXg/ColL
+VLv+0CJteIOZjSCgSN90WzQRrC1Ex5sJfPu6yPEXvW8H1906gEg6ok8rlCIHRGfE
+15pHK5eqxQS5f2n8c2t/Uk33/FBj79/hb3Cd7vE4mdlvReD3AFswC0lV4bPmj3Ka
+KUuMj9xwipwnfWCu6p2/ZJF4M3ADU5grXHJ2Vqmd8DWm5raaObKjYwJddbRBByI8
+bJJLIwAQQmX4Dh4hf1QKlf2oqWPWVQxLQp0erL1U8IWmj1RG8TTH9xOJl6kkEhYq
+Z2gfAgMBAAGjbTBrMEoGA1UdEQRDMEGCE2Fpc2hpYi5hZ3JvcG9saXMuZnKGKmh0
+dHBzOi8vYWlzaGliLmFncm9wb2xpcy5mci9pZHAvc2hpYmJvbGV0aDAdBgNVHQ4E
+FgQU9A7iQ8Qo+t2JCpKuOOV9YBoYs4MwDQYJKoZIhvcNAQEFBQADggEBAG0LOW6I
+F+M8n2NpzyQjfVCJCA6QhWjbXrfemiPJFZGZZb2dVmHof4yCpCUYgHOBoZaXPOlB
+nLYsUWvFZ6V2GELZpLHzHSSrYidieW07qQkh1DwcIYpvtZgLviOtT/tCEGsk925f
+DUoGdeIqpqt54WZcW9+TbKicvjg3JT4BFOQ17bFNwPW+YjTbvsWYxen+e0mRp4vM
+V0yMu2f3bccVhePASSZGL3yod3sJ1dPvlrJO9c35BekhtirolVjZqMQ0AYPVifua
+yIU0dWXsZkAOcBL9kZFbJcYRUIxMgvp8U2Zdv1+ZlwOyXnnWDOOh9wjuT7FAyObU
+ChvjHlgZHkvLwJI=
+					    </ds:X509Certificate>
+					  </ds:X509Data>
+
+					</ds:KeyInfo>
+				</md:KeyDescriptor>
+
+
+
+
+
+			<md:NameIDFormat>urn:mace:shibboleth:1.0:nameIdentifier</md:NameIDFormat>
+			<md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+
+
+			<md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://aishib.agropolis.fr/idp/profile/SAML2/POST/SSO"/>
+
+	        <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://aishib.agropolis.fr/idp/profile/SAML2/Redirect/SSO"/>
+
+
+			<md:SingleSignOnService Binding="urn:mace:shibboleth:1.0:profiles:AuthnRequest" Location="https://aishib.agropolis.fr/idp/profile/Shibboleth/SSO"/>
+
+
+		</md:IDPSSODescriptor>
+
+
+
+		<md:Organization>
+
+			<md:OrganizationName xml:lang="en">Agropolis International</md:OrganizationName>
+			<md:OrganizationDisplayName xml:lang="en">Agropolis International</md:OrganizationDisplayName>
+			<md:OrganizationURL xml:lang="en">http://www.agropolis.fr</md:OrganizationURL>
+
+		</md:Organization>
+
+
+
+			    <md:ContactPerson contactType="technical">
+				 <md:SurName>Jean Cerda</md:SurName>
+				 <md:EmailAddress>cerda@agropolis.fr</md:EmailAddress>
+		        </md:ContactPerson>
+
+
+
+			    <md:ContactPerson contactType="technical">
+				 <md:SurName>Jean-Pierre  Allano</md:SurName>
+				 <md:EmailAddress>allano@agropolis.fr</md:EmailAddress>
+		        </md:ContactPerson>
+
+
+
+
+	</md:EntityDescriptor><md:EntityDescriptor entityID="https://ambre.vetagro-sup.fr/idp/shibboleth">
+			<md:Extensions>
+				<mdrpi:RegistrationInfo registrationAuthority="https://federation.renater.fr/" registrationInstant="2013-01-14T16:11:53Z">
+					<mdrpi:RegistrationPolicy xml:lang="en">https://services.renater.fr/federation/en/metadata_registration_practice_statement</mdrpi:RegistrationPolicy>
+				</mdrpi:RegistrationInfo>
+			</md:Extensions>
+		<md:IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:1.1:protocol urn:mace:shibboleth:1.0 urn:oasis:names:tc:SAML:2.0:protocol">
+			<md:Extensions>
+    				<shibmd:Scope regexp="false">vetagro-sup.fr</shibmd:Scope>
+
+			    <mdui:UIInfo>
+
+			      <mdui:DisplayName xml:lang="en">Vetagro Sup</mdui:DisplayName>
+
+			      <mdui:Logo height="16" width="16">data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAABIAAAASABGyWs+AAAACXZwQWcAAAAQAAAAEABcxq3DAAAB/klEQVQ4y2NkQAP///+X+/jxI/PO7dujP3/7kf7v778ffDzciw2MDFaqq6t/Y2RkfIysngndAEZGxkezZ8/25xEQqVDTs5eRVrNU4RQUL7x9+7YtumasBjAwMDBISIgbcvBKct998p7h1fvfDKyc4nz//jF6yjAwSBNlwM+fP3/9/PmT4dbl4wysrCwMf//9Z/r7959UcFISD1EGPH107xgfD9sbTg52hrcvHjDw87Aw/Pz+7tLEefNuEmWAm6ffxvu3Ll4zMjZleHz/KsO7lw+f3bh+czs2tVgNsLS0fPfs4b3VnKy//wrycW84e2L/uobmtg0MpIKurt6N////Z8jPzxcnWTMDAwPD79//tbq7+9bhU8OMTfD//8cMP79L1X/8tjxMQYHXT0Uh88aBgyuvEW3Aly+8ntw8jLU3bx20cnH/xPz2jTyvk9OGpTt3NhIOxP//GRgkJGR8tPVeyElIvWA4dfIqg57Bff0nD+eHExULIb5dqkYmYgYm5r8YPH3vMzx//omBk+edpI4+vxVRBnz5zPqbi4vt7a9fv//9+cvAYG79jIGZmZWBg4NJiCgDdh4sfHD/7u9j714Z/BYWiGBQVkxjePNK8+erV5+uYDOABTMM/nP09y9Z8+OHgNjli9ahf//++8vGwrlAS0tp/v///7kYGRm/IasHAIVTy8DG/VpJAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDE1LTA3LTIwVDEwOjUwOjA5KzAyOjAwfDtz7wAAACV0RVh0ZGF0ZTptb2RpZnkAMjAxNS0wNy0yMFQxMDo1MDowOSswMjowMA1my1MAAAAASUVORK5CYII=</mdui:Logo>
+			      <mdui:InformationURL xml:lang="fr">http://www.vetagro-sup.fr</mdui:InformationURL>
+
+          		      <mdui:DisplayName xml:lang="fr">Vetagro Sup</mdui:DisplayName>
+
+      			    </mdui:UIInfo>
+			</md:Extensions>
+				<md:KeyDescriptor use="signing">
+<ds:KeyInfo>
+
+					  <ds:X509Data>
+					    <ds:X509Certificate>
+					      MIIDPDCCAiSgAwIBAgIVAL9PsuadPSIZcMHNxlK/oevezmzWMA0GCSqGSIb3DQEB
+BQUAMB8xHTAbBgNVBAMTFGFtYnJlLnZldGFncm8tc3VwLmZyMB4XDTEyMTEwODEw
+MTQwNFoXDTMyMTEwODEwMTQwNFowHzEdMBsGA1UEAxMUYW1icmUudmV0YWdyby1z
+dXAuZnIwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCc/ptfpmkomwmT
+4RsID+1Ce1dX0eUjcLgSOZN8hVpHWLag2ERWkpmvB5aK7BAFcI5i//Gk80tAiasu
+JtlZhBnEw54aTJRGpyL2CVkHyl6SMRxprIi1Ji67IoGqEgUeGaheAxo+tG5e1WSc
+bIbldcSKdwvjAV+7HSB4C6NqLsAzJH25++yaRH2uf2LTD0TDzNR9Q2hVj/VyYWR+
+K3HWI1Snjn/i7aFfZZhYmBkwHuQOaPhwCM+khikg5XicMsxUhHCMi93UgHGIsdkr
+IEGj4xydBTUKsLaykeuFS8EgXbWwCLGkeX76w8xDoFIpnppU/yFd9v7Zg3EBfn4p
+kTW3GdIjAgMBAAGjbzBtMEwGA1UdEQRFMEOCFGFtYnJlLnZldGFncm8tc3VwLmZy
+hitodHRwczovL2FtYnJlLnZldGFncm8tc3VwLmZyL2lkcC9zaGliYm9sZXRoMB0G
+A1UdDgQWBBTPTqWkVHrHXFjmxMWkNt/sp2h5ozANBgkqhkiG9w0BAQUFAAOCAQEA
+FvXMtfBUmRZCzz8CjanGzr1TBUPmnkrKci5AtkseKw9YlfUmBXTHB01y697nYq6m
+RB6KhvfW212h9CF0IOEEjoadgDhXqGYhq8PnAOtT4Ty3XDy8SbRh8aQWfvnfSngv
+FdpHRiSpj5UXXuT5zTtkf59h58XKtEfCkMbUzvdOgUobJzpD0WISmQHPQnx+Neg6
+9j7oMRrDiZjS39Om8Imu9xvsnddDM3PlsDBIsvrr1o7K5iLkEdR1YYX0ZNDbiFuw
+QXXl2dwQPB8KrScPUvCe57slU2gFQvvIBzjQysxC6V6TPSuM3A/ee56lACuB3jKj
+oYkHQc5Gj/1rSMLmu9aLMg==
+					    </ds:X509Certificate>
+					  </ds:X509Data>
+
+					</ds:KeyInfo>
+				</md:KeyDescriptor>
+
+
+
+
+
+			<md:NameIDFormat>urn:mace:shibboleth:1.0:nameIdentifier</md:NameIDFormat>
+			<md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+
+
+			<md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://ambre.vetagro-sup.fr/idp/profile/SAML2/POST/SSO"/>
+
+	        <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://ambre.vetagro-sup.fr/idp/profile/SAML2/Redirect/SSO"/>
+
+
+			<md:SingleSignOnService Binding="urn:mace:shibboleth:1.0:profiles:AuthnRequest" Location="https://ambre.vetagro-sup.fr/idp/profile/Shibboleth/SSO"/>
+
+
+		</md:IDPSSODescriptor>
+
+
+
+		<md:Organization>
+
+			<md:OrganizationName xml:lang="en">Vetagro Sup</md:OrganizationName>
+			<md:OrganizationDisplayName xml:lang="en">Vetagro Sup</md:OrganizationDisplayName>
+			<md:OrganizationURL xml:lang="en">http://www.vetagro-sup.fr</md:OrganizationURL>
+
+		</md:Organization>
+
+
+
+			    <md:ContactPerson contactType="technical">
+				 <md:SurName>Nicolas Aulas</md:SurName>
+				 <md:EmailAddress>nicolas.aulas@vetagro-sup.fr</md:EmailAddress>
+		        </md:ContactPerson>
+
+
+
+
+
+
+	</md:EntityDescriptor><md:EntityDescriptor entityID="https://antimoine.insa-strasbourg.fr/idp/shibboleth">
+			<md:Extensions>
+				<mdrpi:RegistrationInfo registrationAuthority="https://federation.renater.fr/" registrationInstant="2014-02-11T08:44:08Z">
+					<mdrpi:RegistrationPolicy xml:lang="en">https://services.renater.fr/federation/en/metadata_registration_practice_statement</mdrpi:RegistrationPolicy>
+				</mdrpi:RegistrationInfo>
+			</md:Extensions>
+		<md:IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:1.1:protocol urn:mace:shibboleth:1.0 urn:oasis:names:tc:SAML:2.0:protocol">
+			<md:Extensions>
+    				<shibmd:Scope regexp="false">insa-strasbourg.fr</shibmd:Scope>
+
+			    <mdui:UIInfo>
+
+			      <mdui:DisplayName xml:lang="en">INSA Strasbourg</mdui:DisplayName>
+
+			      <mdui:Logo height="16" width="16">data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAq1BMVEXeAACEhoTWz87nQTn3oqXnIBjvgnvWlpT/5+fnEAjvZWOltrXnNDH3mpT/9/fnCAD/4+fvioz3x8bnVVL3qq3nKCnvkpTnHBjvcXP3sq3vgoT/7+/nFBDnODH3mpz////nDAj3z87vlpTveXv3vr3nAACMmpznRUL3pqXnJCHnFAj/+//nDADvjoz3y87vXVr3rq3nLCnvdXP3srXvhoT/8/fvODH3npz3lpQaie6kAAAACXBIWXMAAABIAAAASABGyWs+AAAACXZwQWcAAAAQAAAAEABcxq3DAAAAe0lEQVQY053OwQqCQBhF4VM22VSMMWrFGP2kkIpUQ1nz/m8Ws20TeFeHb3WRnzEBBjO8xRjZrURi0TFiy+UITjTpjIKaOndZuDSGxF0j9G1+e7CuLN1nE2F7VI28tAoqMMezP1ieFOOp7RPueBXKSqdnMq8Wg66nPP0LX4uIG4jEwJ0sAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDE1LTA3LTIwVDEwOjQ5OjA0KzAyOjAwIHfmJQAAACV0RVh0ZGF0ZTptb2RpZnkAMjAxNS0wNy0yMFQxMDo0OTowNCswMjowMFEqXpkAAAAASUVORK5CYII=</mdui:Logo>
+			      <mdui:InformationURL xml:lang="fr">http://www.insa-strasbourg.fr</mdui:InformationURL>
+
+          		      <mdui:DisplayName xml:lang="fr">INSA Strasbourg</mdui:DisplayName>
+
+      			    </mdui:UIInfo>
+			</md:Extensions>
+				<md:KeyDescriptor use="signing">
+<ds:KeyInfo>
+
+					  <ds:X509Data>
+					    <ds:X509Certificate>
+					      MIIDUDCCAjigAwIBAgIVAIbX8U0uAqAhuXm1jWxiFpggtDTDMA0GCSqGSIb3DQEB
+CwUAMCQxIjAgBgNVBAMMGXNvdWZyZS5pbnNhLXN0cmFzYm91cmcuZnIwHhcNMTYw
+OTI3MTIzNjIxWhcNMzYwOTI3MTIzNjIxWjAkMSIwIAYDVQQDDBlzb3VmcmUuaW5z
+YS1zdHJhc2JvdXJnLmZyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA
+sEE02sLRPAG5N81DMHEeGpI2MYF8yG/RiwH07cFIlLqgV80ewOmi0FWPYijxMb8A
+bmx0RwUMvJBVI6WMxtT9fykhID20k8rWOuYOzvaynzVqCktqVgKoEAxP1PFE9b0n
+iGKFprjjNl9ZD90GOUsxbAO7yXG9Q4WBa/eThl6XkUvNkSaZp5hcdWrgcAdsae3q
+iD/uxFa38NXNNeRLGyfxjd2K5qYSzbwBza9s9TOq1+pfw7sxu3/4BnfQ0RLGO6co
+4tH4Mufh0ome4cyYk4pvW5DOd1AznxDb8HpqvE0zwEsa69c/FDX0akgFZydmc77a
+j6USn6JKjjbO49yGtG1gVQIDAQABo3kwdzAdBgNVHQ4EFgQUjzMsxZYiokPYxper
+9zadM8J0F0kwVgYDVR0RBE8wTYIZc291ZnJlLmluc2Etc3RyYXNib3VyZy5mcoYw
+aHR0cHM6Ly9zb3VmcmUuaW5zYS1zdHJhc2JvdXJnLmZyL2lkcC9zaGliYm9sZXRo
+MA0GCSqGSIb3DQEBCwUAA4IBAQBFJKsiS3yfWuDB/E+iqQ0TuQJzL5+JIcloN0dw
+BFxW3VZOju15zeQ7LwRBg9S4SGLMPJU+LM1lvr68cK9brut/FjF51SETIXEeCWo3
+7+PIqgOCzraLNinmpU/OtN8ENalOPvpS6Jvbd23qB2t+IqOtZ+j15b0Yq4/on1E3
+W2F9CVzKpe4EwmmtCPQbe7U1wvhgFylEx797pex8veWs79YSYwqvcKMh79dzl8Fo
+/CgsO5pDrfKmc6SGMkByq75dZj+PqhZDzZ9EFTxbrXOTaS08VRN6a5Rh2iYRnGxq
+yZl66tPcaIm5PHgOEmu5X4lPkUoY+Jt36Gj3SGCbYt8qH5S0
+					    </ds:X509Certificate>
+					  </ds:X509Data>
+
+					</ds:KeyInfo>
+				</md:KeyDescriptor>
+
+
+
+				<md:KeyDescriptor use="signing">
+				       <ds:KeyInfo>
+					  <ds:X509Data>
+					    <ds:X509Certificate>
+					      MIIDXDCCAkSgAwIBAgIVAKI+qiqDCk9wTTqn7OVAoZrvj/CpMA0GCSqGSIb3DQEB
+BQUAMCcxJTAjBgNVBAMTHGFudGltb2luZS5pbnNhLXN0cmFzYm91cmcuZnIwHhcN
+MTQwMTEzMTAzOTU4WhcNMzQwMTEzMTAzOTU4WjAnMSUwIwYDVQQDExxhbnRpbW9p
+bmUuaW5zYS1zdHJhc2JvdXJnLmZyMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIB
+CgKCAQEAtuM8lRjlVjjmrHq9VtguaOMQL+Wd99BiOs56kL3Mbctg1FwH69LYThCW
+6dOz6WJg/jU/naF7jEikXKc71xGyu7Ph7Iqa9S5hoXXAT8u/0q2nZDeTOraJqKe1
+FMF2RzXhEEMyQO3CiKNK9b+tbKoNZS7FQCixMZklWZPt4EcEKd6jyRq1WYX3dpnb
+r9I/aCdhtK/PGvGe5gKTDoTR2HKyWKJTc/obf8x/vlYIEwiaGgdlqI2KiBE0x48n
+zQdP6XVi3T8ZWbnkLmCfgJtP2C8PtEJuwDRAy0Z9N4DSwvxn5YCVYgBLSi0TLa10
+B/lUqqBezZrTrA9p9Lt8JtGXW5YGHwIDAQABo38wfTBcBgNVHREEVTBTghxhbnRp
+bW9pbmUuaW5zYS1zdHJhc2JvdXJnLmZyhjNodHRwczovL2FudGltb2luZS5pbnNh
+LXN0cmFzYm91cmcuZnIvaWRwL3NoaWJib2xldGgwHQYDVR0OBBYEFLFkjPZUc9JY
+qrWjldJ/iGGkKAt4MA0GCSqGSIb3DQEBBQUAA4IBAQBSk/wU1mRn4VF2ifmy261K
+DK7uX+t1H1hh8S38fKSFU7HoNXJTV3vQnmBOpYIGC1gtvmb+qjqpNtikU2zO84Gq
+Q0bXHxYF2d9RUP89mKaFxE5uNcXFmlOA3ChZY3pMT5zwAPI/T60tGrex7zci7OLn
+JDAQj/q4Yk9ejx6JTFggQSCCVh+oV/SDIMd2p5AY6H3mto3b6XCk7Lssa8a/D30k
+pEkZnhTKdN82eRyynuOR7UDU4tasV4d7Mi/j53f5ihnRcsvwh/pYodjoVYY8cEcZ
+JLnAXYF8coSwh8UN4D/0NHsvTuSOFQc85hGrqacMsvxiQiw9mv01AX5+A5YLEbVQ
+					    </ds:X509Certificate>
+					  </ds:X509Data>
+					</ds:KeyInfo>
+				</md:KeyDescriptor>
+
+
+
+			   <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://antimoine.insa-strasbourg.fr/idp/profile/SAML2/Redirect/SLO"/>
+
+			   <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://antimoine.insa-strasbourg.fr/idp/profile/SAML2/POST/SLO"/>
+
+			   <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://antimoine.insa-strasbourg.fr/idp/profile/SAML2/SOAP/SLO"/>
+
+
+			<md:NameIDFormat>urn:mace:shibboleth:1.0:nameIdentifier</md:NameIDFormat>
+			<md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+
+
+			<md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://antimoine.insa-strasbourg.fr/idp/profile/SAML2/POST/SSO"/>
+
+	        <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://antimoine.insa-strasbourg.fr/idp/profile/SAML2/Redirect/SSO"/>
+
+
+			<md:SingleSignOnService Binding="urn:mace:shibboleth:1.0:profiles:AuthnRequest" Location="https://antimoine.insa-strasbourg.fr/idp/profile/Shibboleth/SSO"/>
+
+
+		</md:IDPSSODescriptor>
+
+
+
+		<md:Organization>
+
+			<md:OrganizationName xml:lang="en">INSA Strasbourg</md:OrganizationName>
+			<md:OrganizationDisplayName xml:lang="en">INSA Strasbourg</md:OrganizationDisplayName>
+			<md:OrganizationURL xml:lang="en">http://www.insa-strasbourg.fr</md:OrganizationURL>
+
+		</md:Organization>
+
+
+
+			    <md:ContactPerson contactType="technical">
+				 <md:SurName>Lahsen BOUZID</md:SurName>
+				 <md:EmailAddress>lahsen.bouzid@insa-strasbourg.fr</md:EmailAddress>
+		        </md:ContactPerson>
+
+
+
+			    <md:ContactPerson contactType="technical">
+				 <md:SurName>Simon SCHERRER</md:SurName>
+				 <md:EmailAddress>simon.scherrer@insa-strasbourg.fr</md:EmailAddress>
+		        </md:ContactPerson>
+
+
+
+
+	</md:EntityDescriptor></md:EntitiesDescriptor>
