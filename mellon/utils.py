@@ -79,7 +79,7 @@ def create_server(request):
         for idp in get_idps():
             try:
                 server.addProviderFromBuffer(lasso.PROVIDER_ROLE_IDP, idp['METADATA'])
-            except lasso.Error, e:
+            except lasso.Error as e:
                 logger.error(u'bad metadata in idp %r', idp['ENTITY_ID'])
                 logger.debug(u'lasso error: %s', e)
                 continue

@@ -38,7 +38,7 @@ class DefaultAdapter(object):
                 try:
                     response = requests.get(idp['METADATA_URL'], verify=verify_ssl_certificate)
                     response.raise_for_status()
-                except requests.exceptions.RequestException, e:
+                except requests.exceptions.RequestException as e:
                     self.logger.error(
                         u'retrieval of metadata URL %r failed with error %s for %d-th idp',
                         idp['METADATA_URL'], e, i)
@@ -86,10 +86,10 @@ class DefaultAdapter(object):
                 realm=realm, attributes=saml_attributes, idp=idp)[:30]
         except ValueError:
             self.logger.error(u'invalid username template %r', username_template)
-        except (AttributeError, KeyError, IndexError), e:
+        except (AttributeError, KeyError, IndexError) as e:
             self.logger.error(
                 u'invalid reference in username template %r: %s', username_template, e)
-        except Exception, e:
+        except Exception as e:
             self.logger.exception(u'unknown error when formatting username')
         else:
             return username
@@ -163,7 +163,7 @@ class DefaultAdapter(object):
                 value = unicode(tpl).format(realm=realm, attributes=saml_attributes, idp=idp)
             except ValueError:
                 self.logger.warning(u'invalid attribute mapping template %r', tpl)
-            except (AttributeError, KeyError, IndexError, ValueError), e:
+            except (AttributeError, KeyError, IndexError, ValueError) as e:
                 self.logger.warning(
                     u'invalid reference in attribute mapping template %r: %s', tpl, e)
             else:

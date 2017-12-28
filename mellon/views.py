@@ -120,7 +120,7 @@ class LoginView(ProfileMixin, LogMixin, View):
                 lasso.ProfileStatusNotSuccessError,
                 lasso.ProfileRequestDeniedError):
             self.show_message_status_is_not_success(login, 'SAML authentication failed')
-        except lasso.Error, e:
+        except lasso.Error as e:
             return HttpResponseBadRequest('error processing the authentication response: %r' % e)
         else:
             if 'RelayState' in request.POST and utils.is_nonnull(request.POST['RelayState']):
@@ -262,7 +262,7 @@ class LoginView(ProfileMixin, LogMixin, View):
                                    headers={'content-type': 'text/xml'},
                                    timeout=app_settings.ARTIFACT_RESOLVE_TIMEOUT,
                                    verify=verify_ssl_certificate)
-        except RequestException, e:
+        except RequestException as e:
             self.log.warning('unable to reach %r: %s', login.msgUrl, e)
             return self.sso_failure(request, login, _('IdP is temporarily down, please try again '
                                                       'later.'), status_codes)
@@ -305,7 +305,7 @@ class LoginView(ProfileMixin, LogMixin, View):
                 args[0] += ' message: %r'
                 args.append(status.statusMessage)
             self.log.warning(*args)
-        except lasso.Error, e:
+        except lasso.Error as e:
             self.log.exception('unexpected lasso error')
             return HttpResponseBadRequest('error processing the authentication response: %r' % e)
         else:
@@ -373,7 +373,7 @@ class LoginView(ProfileMixin, LogMixin, View):
                    escape(request.build_absolute_uri(next_url or '/')))
             self.set_next_url(next_url)
             login.buildAuthnRequestMsg()
-        except lasso.Error, e:
+        except lasso.Error as e:
             return HttpResponseBadRequest('error initializing the authentication request: %r' % e)
         self.log.debug('sending authn request %r', authn_request.dump())
         self.log.debug('to url %r', login.msgUrl)
@@ -397,11 +397,11 @@ class LogoutView(ProfileMixin, LogMixin, View):
         self.profile = logout = utils.create_logout(request)
         try:
             logout.processRequestMsg(request.META['QUERY_STRING'])
-        except lasso.Error, e:
+        except lasso.Error as e:
             return HttpResponseBadRequest('error processing logout request: %r' % e)
         try:
             logout.validateRequest()
-        except lasso.Error, e:
+        except lasso.Error as e:
             self.log.warning('error validating logout request: %r' % e)
         issuer = request.session.get('mellon_session', {}).get('issuer')
         if issuer == logout.remoteProviderId:
@@ -409,7 +409,7 @@ class LogoutView(ProfileMixin, LogMixin, View):
             auth.logout(request)
         try:
             logout.buildResponseMsg()
-        except lasso.Error, e:
+        except lasso.Error as e:
             return HttpResponseBadRequest('error processing logout request: %r' % e)
         return HttpResponseRedirect(logout.msgUrl)
 
@@ -431,7 +431,7 @@ class LogoutView(ProfileMixin, LogMixin, View):
                                 self.log.error('unable to find lasso session dump')
                             logout.initRequest(issuer, lasso.HTTP_METHOD_REDIRECT)
                             logout.buildRequestMsg()
-                        except lasso.Error, e:
+                        except lasso.Error as e:
                             self.log.error('unable to initiate a logout request %r', e)
                         else:
                             self.log.debug('sending LogoutRequest %r', logout.request.dump())
@@ -460,7 +460,7 @@ class LogoutView(ProfileMixin, LogMixin, View):
             self.show_message_status_is_not_success(logout, 'SAML logout failed')
         except lasso.LogoutPartialLogoutError:
             self.log.warning('partial logout')
-        except lasso.Error, e:
+        except lasso.Error as e:
             self.log.warning('unable to process a logout response: %s', e)
             return HttpResponseRedirect(resolve_url(settings.LOGIN_REDIRECT_URL))
         next_url = self.get_next_url(default=resolve_url(settings.LOGIN_REDIRECT_URL))
