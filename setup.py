@@ -91,12 +91,12 @@ setup(name="django-mellon",
       include_package_data=True,
       packages=find_packages(),
       install_requires=[
-          'django>=1.5',
+          'django>=1.5,<2.0',
           'requests',
           'isodate',
       ],
       setup_requires=[
-          'django',
+          'django>=1.5,<2.0',
       ],
       tests_require=[
           'nose>=0.11.4',
