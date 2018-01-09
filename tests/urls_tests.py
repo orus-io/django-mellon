@@ -1,6 +1,6 @@
 import django
 
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from django.http import HttpResponse
 
 
@@ -11,6 +11,3 @@ urlpatterns = [
     url('^', include('mellon.urls')),
     url('^$', homepage, name='homepage'),
 ]
-
-if django.VERSION < (1, 9):
-    urlpatterns = patterns('', *urlpatterns)
