@@ -82,19 +82,6 @@ metadata file of the identity provider or if it starts with a slash
 the absolute path toward a metadata file. All other keys are override
 of generic settings.
 
-MELLON_FEDERATIONS
-------------------
-
-A list of dictionaries, only one key 'FEDERATION' is mandatory in those
-dictionaries. It should contain the local path or the remote URL for the
-metadata file describing the SAML-based federation to be loaded in mellon. Both
-relative and absolute paths are supported.
-Additional parameters can be given as key/value pairs in the dictionaries, on
-a similar basis as the aforementioned MELLON_IDENTITY_PROVIDERS config.
-For each dictionary describing a federation, these parameters will apply to
-any successfully-loaded provider belonging to that federation.
-These parameters also override the global settings.
-
 MELLON_PUBLIC_KEYS
 ------------------
 

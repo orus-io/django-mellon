@@ -36,32 +36,16 @@ class AppSettings(object):
         'LOGIN_URL': 'mellon_login',
         'LOGOUT_URL': 'mellon_logout',
         'ARTIFACT_RESOLVE_TIMEOUT': 10.0,
-        'FEDERATIONS': [],
     }
-
-    @property
-    def FEDERATIONS(self):
-        from django.conf import settings
-        if settings.hasattr('MELLON_FEDERATIONS'):
-            federations = settings.MELLON_FEDERATIONS
-        if isinstance(federations, dict):
-            federations = [federations]
-        return federations
 
     @property
     def IDENTITY_PROVIDERS(self):
         from django.conf import settings
-        idps = []
         try:
-            if hasattr(settings, 'MELLON_IDENTITY_PROVIDERS'):
-                idps = settings.MELLON_IDENTITY_PROVIDERS
-            elif not hasattr(settings, 'MELLON_FEDERATIONS'):
-                raise AttributeError
+            idps = settings.MELLON_IDENTITY_PROVIDERS
         except AttributeError:
             from django.core.exceptions import ImproperlyConfigured
-            raise ImproperlyConfigured('Either the MELLON_IDENTITY_PROVIDERS '
-                                       'or the MELLON_FEDERATIONS settings '
-                                       'are mandatory')
+            raise ImproperlyConfigured('The MELLON_IDENTITY_PROVIDERS setting is mandatory')
         if isinstance(idps, dict):
             idps = [idps]
         return idps

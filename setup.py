@@ -94,7 +94,6 @@ setup(name="django-mellon",
           'django>=1.5,<2.0',
           'requests',
           'isodate',
-          'pytz',
       ],
       setup_requires=[
           'django>=1.5,<2.0',

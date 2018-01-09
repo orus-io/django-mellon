@@ -9,12 +9,8 @@ import requests.exceptions
 from django.core.exceptions import PermissionDenied
 from django.contrib import auth
 from django.contrib.auth.models import Group
-from django.utils.text import slugify
 
 from . import utils, app_settings, models
-from mellon.federation_utils import idp_metadata_store, url2filename, \
-        idp_metadata_extract_entity_id, idp_metadata_is_cached, \
-        idp_metadata_load, idp_settings_store, idp_settings_load
 
 
 class UserCreationError(Exception):
@@ -27,60 +23,15 @@ class DefaultAdapter(object):
 
     def get_idp(self, entity_id):
         '''Find the first IdP definition matching entity_id'''
-        idp = None
-        if idp_metadata_is_cached(entity_id):
-            metadata_content = idp_metadata_load(entity_id)
-            entity_id = idp_metadata_extract_entity_id(metadata_content)
-            idp = {'METADATA': metadata_content,
-                   'ENTITY_ID': entity_id}
-        else:
-            for extra_idp in self.get_identity_providers_setting():
-                if extra_idp.get('ENTITY_ID') == entity_id or \
-                        idp_metadata_extract_entity_id(extra_idp) == entity_id:
-                    idp = extra_idp.copy()
-
-        extra_idp_settings = idp_settings_load(entity_id)
-        if extra_idp_settings and idp:
-            idp.update(extra_idp_settings)
-        return idp
+        for idp in self.get_idps():
+            if entity_id == idp['ENTITY_ID']:
+                return idp
 
     def get_identity_providers_setting(self):
-        for federation_data in self.get_federations():
-            if not isinstance(federation_data, dict) or \
-                    'FEDERATION' not in federation_data:
-                continue
-            fed_extra_attrs = federation_data.copy()
-            fed_content = fed_extra_attrs.pop('FEDERATION')
-            fed_filepath, _ = utils.get_federation_metadata(fed_content)
-
-            try:
-                tree = ET.parse(fed_filepath)
-                root = tree.getroot()
-                for child in root:
-                    provider = {}
-                    entity_id = idp_metadata_extract_entity_id(ET.tostring(child))
-                    if not entity_id:
-                        continue
-                    provider['METADATA'] = idp_metadata_store(ET.tostring(child))
-                    provider.update({'ENTITY_ID': entity_id})
-                    provider.update(fed_extra_attrs)
-                    idp_settings_store(provider)
-                    yield provider
-            except:
-                self.logger.error('Couldn\'t load federation metadata file %r',
-                                  fed_filepath)
-                continue
-
-        for extra_provider in app_settings.IDENTITY_PROVIDERS:
-            yield extra_provider
-
-    def get_federations(self):
-        for federation in getattr(app_settings, 'FEDERATIONS', []):
-            yield federation
+        return app_settings.IDENTITY_PROVIDERS
 
     def get_idps(self):
         for i, idp in enumerate(self.get_identity_providers_setting()):
-            entity_id = idp.get('ENTITY_ID')
             if 'METADATA_URL' in idp and 'METADATA' not in idp:
                 verify_ssl_certificate = utils.get_setting(
                     idp, 'VERIFY_SSL_CERTIFICATE')
@@ -92,17 +43,28 @@ class DefaultAdapter(object):
                         u'retrieval of metadata URL %r failed with error %s for %d-th idp',
                         idp['METADATA_URL'], e, i)
                     continue
-                md_content = response.content
-                if not entity_id:
-                    entity_id = idp_metadata_extract_entity_id(md_content)
-                idp['METADATA'] = idp_metadata_store(md_content)
-            elif not idp.get('METADATA'):
+                idp['METADATA'] = response.content
+            elif 'METADATA' in idp:
+                if idp['METADATA'].startswith('/'):
+                    idp['METADATA'] = file(idp['METADATA']).read()
+            else:
                 self.logger.error(u'missing METADATA or METADATA_URL in %d-th idp', i)
                 continue
-            # load federation-specific configuration
-            extra_idp_settings = idp_settings_load(entity_id)
-            if extra_idp_settings:
-                idp.update(idp_settings_load(entity_id))
+            if 'ENTITY_ID' not in idp:
+                try:
+                    doc = ET.fromstring(idp['METADATA'])
+                except (TypeError, ET.ParseError):
+                    self.logger.error(u'METADATA of %d-th idp is invalid', i)
+                    continue
+                if doc.tag != '{%s}EntityDescriptor' % lasso.SAML2_METADATA_HREF:
+                    self.logger.error(u'METADATA of %d-th idp has no EntityDescriptor root tag', i)
+                    continue
+
+                if not 'entityID' in doc.attrib:
+                    self.logger.error(
+                        u'METADATA of %d-th idp has no entityID attribute on its root tag', i)
+                    continue
+                idp['ENTITY_ID'] = doc.attrib['entityID']
             yield idp
 
     def authorize(self, idp, saml_attributes):

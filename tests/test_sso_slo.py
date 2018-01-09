@@ -4,8 +4,7 @@ from pytest import fixture
 
 from django.core.urlresolvers import reverse
 
-from mellon.utils import create_metadata, create_server
-from django.utils.http import urlencode
+from mellon.utils import create_metadata
 
 from httmock import all_requests, HTTMock, response as mock_response
 
@@ -15,11 +14,6 @@ from utils import reset_caplog
 @fixture
 def idp_metadata():
     return open('tests/metadata.xml').read()
-
-
-@fixture
-def federation_metadata():
-    return './tests/federation-sample.xml'
 
 
 @fixture
@@ -50,25 +44,7 @@ def sp_settings(private_settings, idp_metadata, sp_private_key, public_key):
 
 
 @fixture
-def federated_sp_settings(private_settings, federation_metadata, sp_private_key, public_key):
-    private_settings.MELLON_FEDERATIONS = [{
-        'FEDERATION': federation_metadata,
-    }]
-    private_settings.MELLON_PUBLIC_KEYS = [public_key]
-    private_settings.MELLON_PRIVATE_KEYS = [sp_private_key]
-    private_settings.MELLON_NAME_ID_POLICY_FORMAT = lasso.SAML2_NAME_IDENTIFIER_FORMAT_PERSISTENT
-    private_settings.LOGIN_REDIRECT_URL = '/'
-    return private_settings
-
-
-@fixture
 def sp_metadata(sp_settings, rf):
-    request = rf.get('/')
-    return create_metadata(request)
-
-
-@fixture
-def federated_sp_metadata(federated_sp_settings, rf):
     request = rf.get('/')
     return create_metadata(request)
 
@@ -125,11 +101,6 @@ class MockIdp(object):
 @fixture
 def idp(sp_settings, idp_metadata, idp_private_key, sp_metadata):
     return MockIdp(idp_metadata, idp_private_key, sp_metadata)
-
-
-@fixture
-def federated_idp(federated_sp_settings, idp_metadata, idp_private_key, federated_sp_metadata):
-    return MockIdp(idp_metadata, idp_private_key, federated_sp_metadata)
 
 
 def test_sso_slo(db, app, idp, caplog, sp_settings):
@@ -200,60 +171,3 @@ def test_sso_artifact(db, app, caplog, sp_settings, idp_metadata, idp_private_ke
     assert 'created new user' in caplog.text
     assert 'logged in using SAML' in caplog.text
     assert response['Location'].endswith(sp_settings.LOGIN_REDIRECT_URL)
-
-
-def test_login_federation(db, app, federated_idp, caplog, federated_sp_settings):
-    qs = urlencode({
-        'entityID': 'http://idp5/metadata',
-    })
-    response = app.get('/login/?' + qs)
-    url, body = federated_idp.process_authn_request_redirect(response['Location'])
-    assert url.endswith(reverse('mellon_login'))
-    response = app.post(reverse('mellon_login'), params={'SAMLResponse': body})
-    assert 'created new user' in caplog.text
-    assert 'logged in using SAML' in caplog.text
-    assert response['Location'].endswith(federated_sp_settings.LOGIN_REDIRECT_URL)
-
-
-def test_sso_artifact_federation(db, app, caplog, federated_sp_settings, idp_metadata, idp_private_key, rf):
-    qs = urlencode({
-        'entityID': 'http://idp5/metadata',
-    })
-    federated_sp_settings.MELLON_DEFAULT_ASSERTION_CONSUMER_BINDING = 'artifact'
-    request = rf.get('/')
-    federated_sp_metadata = create_metadata(request)
-    idp = MockIdp(idp_metadata, idp_private_key, federated_sp_metadata)
-    response = app.get('/login/?' + qs)
-    url, body = idp.process_authn_request_redirect(response['Location'])
-    assert body is None
-    assert reverse('mellon_login') in url
-    assert 'SAMLart' in url
-    acs_artifact_url = url.split('testserver', 1)[1]
-    with HTTMock(idp.mock_artifact_resolver()):
-        response = app.get(acs_artifact_url)
-    assert 'created new user' in caplog.text
-    assert 'logged in using SAML' in caplog.text
-    assert response['Location'].endswith(federated_sp_settings.LOGIN_REDIRECT_URL)
-    # force delog
-    app.session.flush()
-    assert 'dead artifact' not in caplog.text
-    with HTTMock(idp.mock_artifact_resolver()):
-        response = app.get(acs_artifact_url)
-    # verify retry login was asked
-    assert 'dead artifact' in caplog.text
-    assert response.status_code == 302
-    assert reverse('mellon_login') in url
-    response = response.follow()
-    url, body = idp.process_authn_request_redirect(response['Location'])
-    reset_caplog(caplog)
-    # verify caplog has been cleaned
-    assert 'created new user' not in caplog.text
-    assert body is None
-    assert reverse('mellon_login') in url
-    assert 'SAMLart' in url
-    acs_artifact_url = url.split('testserver', 1)[1]
-    with HTTMock(idp.mock_artifact_resolver()):
-        response = app.get(acs_artifact_url)
-    assert 'created new user' in caplog.text
-    assert 'logged in using SAML' in caplog.text
-    assert response['Location'].endswith(federated_sp_settings.LOGIN_REDIRECT_URL)
