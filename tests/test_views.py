@@ -8,7 +8,6 @@ import hashlib
 from httmock import HTTMock
 
 from django.core.urlresolvers import reverse
-from django.core.exceptions import ImproperlyConfigured
 from django.utils.http import urlencode
 
 from xml_utils import assert_xml_constraints
@@ -120,11 +119,6 @@ def test_metadata(private_settings, client):
           ('[@contactType="technical"]', 1),
           ('[@contactType="administrative"]', 1))),
         namespaces=ns)
-
-
-def test_sp_initiated_login_improperly_configured(private_settings, client):
-    with pytest.raises(ImproperlyConfigured):
-        client.get('/login/')
 
 
 def test_sp_initiated_login_improperly_configured2(private_settings, client):
