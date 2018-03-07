@@ -28,6 +28,9 @@ class DefaultAdapter(object):
                 return idp
 
     def get_identity_providers_setting(self):
+        if not app_settings.IDENTITY_PROVIDERS:
+            from django.core.exceptions import ImproperlyConfigured
+            raise ImproperlyConfigured('The MELLON_IDENTITY_PROVIDERS setting is mandatory')
         return app_settings.IDENTITY_PROVIDERS
 
     def get_idps(self):
