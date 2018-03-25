@@ -200,7 +200,7 @@ class LoginView(ProfileMixin, LogMixin, View):
         if user is not None:
             if user.is_active:
                 utils.login(request, user)
-                self.log.info('user %r (NameID is %r) logged in using SAML', unicode(user),
+                self.log.info('user %s (NameID is %r) logged in using SAML', user,
                               attributes['name_id_content'])
                 request.session['mellon_session'] = utils.flatten_datetime(attributes)
                 if ('session_not_on_or_after' in attributes and
@@ -209,7 +209,7 @@ class LoginView(ProfileMixin, LogMixin, View):
                         utils.get_seconds_expiry(
                             attributes['session_not_on_or_after']))
             else:
-                self.log.warning('user %r (NameID is %r) is inactive, login refused', unicode(user),
+                self.log.warning('user %s (NameID is %r) is inactive, login refused', user,
                                  attributes['name_id_content'])
                 return render(request, 'mellon/inactive_user.html', {
                     'user': user,
