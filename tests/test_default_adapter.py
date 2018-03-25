@@ -12,7 +12,7 @@ from mellon.backends import SAMLBackend
 pytestmark = pytest.mark.django_db
 
 idp = {
-    'METADATA': file('tests/metadata.xml').read(),
+    'METADATA': open('tests/metadata.xml').read(),
 }
 saml_attributes = {
     'name_id_format': lasso.SAML2_NAME_IDENTIFIER_FORMAT_PERSISTENT,

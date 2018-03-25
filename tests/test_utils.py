@@ -61,7 +61,7 @@ def test_create_server_invalid_metadata_file(mocker, rf, private_settings, caplo
     ]
     request = rf.get('/')
     assert not 'failed with error' in caplog.text
-    with mock.patch('mellon.adapters.file', mock.mock_open(read_data='yyy'), create=True):
+    with mock.patch('mellon.adapters.open', mock.mock_open(read_data='yyy'), create=True):
         with HTTMock(error_500):
             server = create_server(request)
     assert len(server.providers) == 0
@@ -75,7 +75,7 @@ def test_create_server_good_metadata_file(mocker, rf, private_settings, caplog):
     ]
     request = rf.get('/')
     with mock.patch(
-        'mellon.adapters.file', mock.mock_open(read_data=file('tests/metadata.xml').read()),
+        'mellon.adapters.open', mock.mock_open(read_data=open('tests/metadata.xml').read()),
             create=True):
         server = create_server(request)
     assert 'ERROR' not in caplog.text
@@ -85,7 +85,7 @@ def test_create_server_good_metadata_file(mocker, rf, private_settings, caplog):
 def test_create_server_good_metadata(mocker, rf, private_settings, caplog):
     private_settings.MELLON_IDENTITY_PROVIDERS = [
         {
-            'METADATA': file('tests/metadata.xml').read(),
+            'METADATA': open('tests/metadata.xml').read(),
         }
     ]
     request = rf.get('/')
@@ -131,7 +131,7 @@ def test_create_metadata(rf, private_settings, caplog):
     private_settings.MELLON_NAME_ID_FORMATS = [lasso.SAML2_NAME_IDENTIFIER_FORMAT_UNSPECIFIED]
     private_settings.MELLON_DEFAULT_ASSERTION_CONSUMER_BINDING = 'artifact'
     request = rf.get('/')
-    with mock.patch('mellon.utils.file', mock.mock_open(read_data='BEGIN\nyyy\nEND'), create=True):
+    with mock.patch('mellon.utils.open', mock.mock_open(read_data='BEGIN\nyyy\nEND'), create=True):
         metadata = create_metadata(request)
     assert_xml_constraints(
         metadata.encode('utf-8'),

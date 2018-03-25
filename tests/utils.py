@@ -13,7 +13,7 @@ def html_response(url, request):
 
 @all_requests
 def metadata_response(url, request):
-    return response(200, content=file('tests/metadata.xml').read())
+    return response(200, content=open('tests/metadata.xml').read())
 
 
 def reset_caplog(cap):

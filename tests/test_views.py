@@ -83,7 +83,7 @@ def test_metadata(private_settings, client):
         },
     ]
 
-    with mock.patch('mellon.utils.file', mock.mock_open(read_data='BEGIN\nyyy\nEND'), create=True):
+    with mock.patch('mellon.utils.open', mock.mock_open(read_data='BEGIN\nyyy\nEND'), create=True):
         response = client.get('/metadata/')
     assert_xml_constraints(
         response.content,

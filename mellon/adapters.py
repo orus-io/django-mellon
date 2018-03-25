@@ -46,7 +46,7 @@ class DefaultAdapter(object):
                 idp['METADATA'] = response.content
             elif 'METADATA' in idp:
                 if idp['METADATA'].startswith('/'):
-                    idp['METADATA'] = file(idp['METADATA']).read()
+                    idp['METADATA'] = open(idp['METADATA']).read()
             else:
                 self.logger.error(u'missing METADATA or METADATA_URL in %d-th idp', i)
                 continue
