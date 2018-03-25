@@ -114,7 +114,7 @@ def get_idps():
 
 def flatten_datetime(d):
     d = d.copy()
-    for key, value in d.iteritems():
+    for key, value in d.items():
         if isinstance(value, datetime.datetime):
             d[key] = value.isoformat()
     return d

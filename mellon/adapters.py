@@ -158,7 +158,7 @@ class DefaultAdapter(object):
         realm = utils.get_setting(idp, 'REALM')
         attribute_mapping = utils.get_setting(idp, 'ATTRIBUTE_MAPPING')
         attribute_set = False
-        for field, tpl in attribute_mapping.iteritems():
+        for field, tpl in attribute_mapping.items():
             try:
                 value = unicode(tpl).format(realm=realm, attributes=saml_attributes, idp=idp)
             except ValueError:
@@ -184,7 +184,7 @@ class DefaultAdapter(object):
         if not superuser_mapping:
             return
         attribute_set = False
-        for key, values in superuser_mapping.iteritems():
+        for key, values in superuser_mapping.items():
             if key in saml_attributes:
                 if not isinstance(values, (tuple, list)):
                     values = [values]
