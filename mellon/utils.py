@@ -228,16 +228,18 @@ def get_status_codes_and_message(profile):
     assert profile.response, 'missing response in profile'
     assert profile.response.status, 'missing status in response'
 
+    from .views import lasso_decode
+
     status_codes = []
 
     status = profile.response.status
     a = status
     while a.statusCode:
-        status_codes.append(a.statusCode.value.decode('utf-8'))
+        status_codes.append(lasso_decode(a.statusCode.value))
         a = a.statusCode
     message = None
     if status.statusMessage:
-        message = status.statusMessage.decode('utf-8')
+        message = lasso_decode(status.statusMessage)
     return status_codes, message
 
 def login(request, user):

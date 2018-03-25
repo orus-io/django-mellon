@@ -13,6 +13,7 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, resolve_url
 from django.utils.http import urlencode
+from django.utils import six
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.db import transaction
 from django.utils.translation import ugettext as _
@@ -21,6 +22,11 @@ from . import app_settings, utils
 
 
 lasso.setFlag('thin-sessions')
+
+if six.PY3:
+    lasso_decode = lambda x: x
+else:
+    lasso_decode = lambda x: x.decode('utf-8')
 
 
 class LogMixin(object):
@@ -157,20 +163,20 @@ class LoginView(ProfileMixin, LogMixin, View):
                 for value in at.attributeValue:
                     content = [any.exportToXml() for any in value.any]
                     content = ''.join(content)
-                    values.append(content.decode('utf8'))
+                    values.append(lasso_decode(content))
         attributes['issuer'] = login.remoteProviderId
         if login.nameIdentifier:
             name_id = login.nameIdentifier
-            name_id_format = unicode(name_id.format
+            name_id_format = six.u(name_id.format
                                      or lasso.SAML2_NAME_IDENTIFIER_FORMAT_UNSPECIFIED)
             attributes.update({
-                'name_id_content': name_id.content.decode('utf8'),
+                'name_id_content': lasso_decode(name_id.content),
                 'name_id_format': name_id_format
             })
             if name_id.nameQualifier:
-                attributes['name_id_name_qualifier'] = unicode(name_id.nameQualifier)
+                attributes['name_id_name_qualifier'] = six.u(name_id.nameQualifier)
             if name_id.spNameQualifier:
-                attributes['name_id_sp_name_qualifier'] = unicode(name_id.spNameQualifier)
+                attributes['name_id_sp_name_qualifier'] = six.u(name_id.spNameQualifier)
         authn_statement = login.assertion.authnStatement[0]
         if authn_statement.authnInstant:
             attributes['authn_instant'] = utils.iso8601_to_datetime(authn_statement.authnInstant)
@@ -302,7 +308,7 @@ class LoginView(ProfileMixin, LogMixin, View):
                 a = a.statusCode
             args = ['SAML authentication failed: status is not success codes: %r', status_codes]
             if status.statusMessage:
-                idp_message = status.statusMessage.decode('utf-8')
+                idp_message = lasso_decode(status.statusMessage)
                 args[0] += ' message: %r'
                 args.append(status.statusMessage)
             self.log.warning(*args)
