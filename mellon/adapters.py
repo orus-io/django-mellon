@@ -9,6 +9,7 @@ import requests.exceptions
 from django.core.exceptions import PermissionDenied
 from django.contrib import auth
 from django.contrib.auth.models import Group
+from django.utils import six
 
 from . import utils, app_settings, models
 
@@ -82,7 +83,7 @@ class DefaultAdapter(object):
         realm = utils.get_setting(idp, 'REALM')
         username_template = utils.get_setting(idp, 'USERNAME_TEMPLATE')
         try:
-            username = unicode(username_template).format(
+            username = six.u(username_template).format(
                 realm=realm, attributes=saml_attributes, idp=idp)[:30]
         except ValueError:
             self.logger.error(u'invalid username template %r', username_template)
@@ -112,7 +113,7 @@ class DefaultAdapter(object):
             if (transient_federation_attribute
                     and saml_attributes.get(transient_federation_attribute)):
                 name_id = saml_attributes[transient_federation_attribute]
-                if not isinstance(name_id, basestring):
+                if not isinstance(name_id, six.string_types):
                     if len(name_id) == 1:
                         name_id = name_id[0]
                     else:
@@ -160,7 +161,7 @@ class DefaultAdapter(object):
         attribute_set = False
         for field, tpl in attribute_mapping.items():
             try:
-                value = unicode(tpl).format(realm=realm, attributes=saml_attributes, idp=idp)
+                value = six.u(tpl).format(realm=realm, attributes=saml_attributes, idp=idp)
             except ValueError:
                 self.logger.warning(u'invalid attribute mapping template %r', tpl)
             except (AttributeError, KeyError, IndexError, ValueError) as e:
