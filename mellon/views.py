@@ -272,8 +272,9 @@ class LoginView(ProfileMixin, LogMixin, View):
             return self.sso_failure(request, login, idp_message, status_codes)
 
         self.log.info('Got SAML Artifact Response', extra={'saml_response': result.content})
+        result.encoding = utils.get_xml_encoding(result.content)
         try:
-            login.processResponseMsg(result.content)
+            login.processResponseMsg(result.text)
             login.acceptSso()
         except lasso.ProfileMissingResponseError:
             # artifact is invalid, idp returned no response

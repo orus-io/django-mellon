@@ -3,6 +3,7 @@ import datetime
 import importlib
 from functools import wraps
 import isodate
+from xml.parsers import expat
 
 from django.contrib import auth
 from django.core.urlresolvers import reverse
@@ -246,3 +247,13 @@ def login(request, user):
             break
     else:
         auth.login(request, user)
+
+
+def get_xml_encoding(content):
+    xml_encoding = 'utf-8'
+    def xmlDeclHandler(version, encoding, standalone):
+        xml_encoding = encoding
+    parser = expat.ParserCreate()
+    parser.XmlDeclHandler = xmlDeclHandler
+    parser.Parse(content, True)
+    return xml_encoding
