@@ -3,6 +3,7 @@ import lasso
 from pytest import fixture
 
 from django.core.urlresolvers import reverse
+from django.utils import six
 
 from mellon.utils import create_metadata
 
@@ -128,7 +129,11 @@ def test_sso_request_denied(db, app, idp, caplog, sp_settings):
     url, body = idp.process_authn_request_redirect(response['Location'], auth_result=False)
     assert url.endswith(reverse('mellon_login'))
     response = app.post(reverse('mellon_login'), params={'SAMLResponse': body})
-    assert "status is not success codes: [u'urn:oasis:names:tc:SAML:2.0:status:Responder',\
+    if six.PY3:
+        assert "status is not success codes: ['urn:oasis:names:tc:SAML:2.0:status:Responder',\
+ 'urn:oasis:names:tc:SAML:2.0:status:RequestDenied']" in caplog.text
+    else:
+        assert "status is not success codes: [u'urn:oasis:names:tc:SAML:2.0:status:Responder',\
  u'urn:oasis:names:tc:SAML:2.0:status:RequestDenied']" in caplog.text
 
 

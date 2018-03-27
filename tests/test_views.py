@@ -8,6 +8,7 @@ import hashlib
 from httmock import HTTMock
 
 from django.core.urlresolvers import reverse
+from django.utils.encoding import force_text
 from django.utils.http import urlencode
 
 from xml_utils import assert_xml_constraints
@@ -125,7 +126,7 @@ def test_sp_initiated_login_improperly_configured2(private_settings, client):
     private_settings.MELLON_IDENTITY_PROVIDERS = []
     response = client.get('/login/')
     assert response.status_code == 400
-    assert 'no idp found' in response.content
+    assert b'no idp found' in response.content
 
 
 def test_sp_initiated_login_discovery_service(private_settings, client):
@@ -154,7 +155,7 @@ def test_sp_initiated_login_discovery_service_nodisco(private_settings, client):
     private_settings.MELLON_DISCOVERY_SERVICE_URL = 'https://disco'
     response = client.get('/login/?nodisco=1')
     assert response.status_code == 400
-    assert 'no idp found' in response.content
+    assert b'no idp found' in response.content
 
 
 def test_sp_initiated_login(private_settings, client):
@@ -199,7 +200,7 @@ def test_sp_initiated_login_requested_authn_context(private_settings, client):
     assert response.status_code == 302
     params = parse_qs(urlparse(response['Location']).query)
     assert response['Location'].startswith('http://idp5/singleSignOn?')
-    assert params.keys() == ['SAMLRequest']
+    assert list(params.keys()) == ['SAMLRequest']
     assert len(params['SAMLRequest']) == 1
     assert base64.b64decode(params['SAMLRequest'][0])
     request = lasso.Samlp2AuthnRequest()
@@ -213,15 +214,15 @@ def test_malfortmed_artifact(private_settings, client, caplog):
         'METADATA': open('tests/metadata.xml').read(),
     }]
     response = client.get('/login/?SAMLart=xxx', status=400)
-    assert 'artifact is malformed' in response.content
+    assert b'artifact is malformed' in response.content
     assert 'artifact is malformed' in caplog.text
 
 
 @pytest.fixture
 def artifact():
-    entity_id = 'http://idp5/metadata'
-    token = 'x' * 20
-    return base64.b64encode('\x00\x04\x00\x00' + hashlib.sha1(entity_id).digest() + token)
+    entity_id = b'http://idp5/metadata'
+    token = b'x' * 20
+    return force_text(base64.b64encode(b'\x00\x04\x00\x00' + hashlib.sha1(entity_id).digest() + token))
 
 
 def test_error_500_on_artifact_resolve(private_settings, client, caplog, artifact):
