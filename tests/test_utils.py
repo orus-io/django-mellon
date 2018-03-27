@@ -167,17 +167,17 @@ def test_iso8601_to_datetime(private_settings):
     private_settings.USE_TZ = False
     # UTC ISO8601 -> naive datetime UTC
     assert iso8601_to_datetime('2010-10-01T10:10:34Z') == datetime.datetime(
-        2010, 10, 01, 10, 10, 34)
+        2010, 10, 1, 10, 10, 34)
     # NAIVE ISO8601 -> naive datetime UTC
     assert iso8601_to_datetime('2010-10-01T10:10:34') == datetime.datetime(
-        2010, 10, 01, 10, 10, 34)
+        2010, 10, 1, 10, 10, 34)
     private_settings.USE_TZ = True
     # UTC+1h ISO8601 -> Aware datetime UTC
     assert iso8601_to_datetime('2010-10-01T10:10:34+01:00') == datetime.datetime(
-        2010, 10, 01, 9, 10, 34, tzinfo=pytz.utc)
+        2010, 10, 1, 9, 10, 34, tzinfo=pytz.utc)
     # Naive ISO8601 -> Aware datetime UTC
     assert iso8601_to_datetime('2010-10-01T10:10:34') == datetime.datetime(
-        2010, 10, 01, 10, 10, 34, tzinfo=pytz.utc)
+        2010, 10, 1, 10, 10, 34, tzinfo=pytz.utc)
 
 
 def test_flatten_datetime():
