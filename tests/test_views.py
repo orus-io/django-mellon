@@ -1,7 +1,7 @@
 import pytest
 import mock
 import lasso
-from urlparse import parse_qs, urlparse
+from django.utils.six.moves.urllib.parse import parse_qs, urlparse
 import base64
 import random
 import hashlib
