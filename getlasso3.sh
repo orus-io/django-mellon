@@ -14,6 +14,9 @@ rm -f $DSTDIR/_lasso.*
 
 # Link
 ln -sv /usr/lib/python3/dist-packages/lasso.py $DSTDIR/
-ln -sv /usr/lib/python3/dist-packages/_lasso.cpython-36m-x86_64-linux-gnu.so $DSTDIR/
+for SOFILE in /usr/lib/python3/dist-packages/_lasso.cpython-*.so
+do
+  ln -sv $SOFILE $DSTDIR/
+done
 
 exit 0
