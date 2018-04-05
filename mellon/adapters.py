@@ -44,7 +44,7 @@ class DefaultAdapter(object):
                         u'retrieval of metadata URL %r failed with error %s for %d-th idp',
                         idp['METADATA_URL'], e, i)
                     continue
-                idp['METADATA'] = response.content
+                idp['METADATA'] = response.text
             elif 'METADATA' in idp:
                 if idp['METADATA'].startswith('/'):
                     idp['METADATA'] = open(idp['METADATA']).read()
