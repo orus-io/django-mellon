@@ -373,13 +373,19 @@ class LoginView(ProfileMixin, LogMixin, View):
 
             if utils.get_setting(idp, 'ADD_AUTHNREQUEST_NEXT_URL_EXTENSION'):
                 authn_request.extensions = lasso.Samlp2Extensions()
-                authn_request.extensions.setOriginalXmlnode(
+                eo_next_url = escape(request.build_absolute_uri(next_url or '/'))
+                # lasso>2.5.1 introduced a better API
+                if hasattr(authn_request.extensions, 'any'):
+                    authn_request.extensions.any = (
+                        '<eo:next_url xmlns:eo="https://www.entrouvert.com/">%s</eo:next_url>' % eo_next_url,)
+                else:
+                    authn_request.extensions.setOriginalXmlnode(
                         '''<samlp:Extensions
-                                xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
-                                xmlns:eo="https://www.entrouvert.com/">
-                              <eo:next_url>%s</eo:next_url>
-                           </samlp:Extensions>''' %
-                       escape(request.build_absolute_uri(next_url or '/')))
+                                 xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+                                 xmlns:eo="https://www.entrouvert.com/">
+                               <eo:next_url>%s</eo:next_url>
+                            </samlp:Extensions>''' % eo_next_url
+                        )
             self.set_next_url(next_url)
             login.buildAuthnRequestMsg()
         except lasso.Error as e:
