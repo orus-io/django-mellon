@@ -77,9 +77,9 @@ def test_lookup_user_transaction(transactional_db, concurrency):
 def test_provision_user_attributes(settings, django_user_model, caplog):
     settings.MELLON_IDENTITY_PROVIDERS = [idp]
     settings.MELLON_ATTRIBUTE_MAPPING = {
-        'email': '{attributes[email][0]}',
-        'first_name': '{attributes[first_name][0]}',
-        'last_name': '{attributes[last_name][0]}',
+        'email': u'{attributes[email][0]}',
+        'first_name': u'{attributes[first_name][0]}',
+        'last_name': u'{attributes[last_name][0]}',
     }
     user = SAMLBackend().authenticate(saml_attributes=saml_attributes)
     assert user.username == 'x' * 30

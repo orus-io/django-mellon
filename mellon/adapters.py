@@ -10,6 +10,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib import auth
 from django.contrib.auth.models import Group
 from django.utils import six
+from django.utils.encoding import force_text
 
 from . import utils, app_settings, models
 
@@ -83,7 +84,7 @@ class DefaultAdapter(object):
         realm = utils.get_setting(idp, 'REALM')
         username_template = utils.get_setting(idp, 'USERNAME_TEMPLATE')
         try:
-            username = six.u(username_template).format(
+            username = force_text(username_template).format(
                 realm=realm, attributes=saml_attributes, idp=idp)[:30]
         except ValueError:
             self.logger.error(u'invalid username template %r', username_template)
@@ -161,7 +162,7 @@ class DefaultAdapter(object):
         attribute_set = False
         for field, tpl in attribute_mapping.items():
             try:
-                value = six.u(tpl).format(realm=realm, attributes=saml_attributes, idp=idp)
+                value = force_text(tpl).format(realm=realm, attributes=saml_attributes, idp=idp)
             except ValueError:
                 self.logger.warning(u'invalid attribute mapping template %r', tpl)
             except (AttributeError, KeyError, IndexError, ValueError) as e:
