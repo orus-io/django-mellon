@@ -59,6 +59,13 @@ def test_lookup_user_transaction(transactional_db, concurrency):
     adapter = DefaultAdapter()
     p = ThreadPool(concurrency)
 
+    if connection.vendor == 'postgresql':
+        with connection.cursor() as c:
+            c.execute('SHOW max_connections')
+            max_connections = c.fetchone()[0]
+            if int(max_connections) <= concurrency:
+                pytest.skip('Number of concurrent connections above postgresql maximum limit')
+
     def f(i):
         # sqlite has a default lock timeout of 5s seconds between different access to the same in
         # memory DB
