@@ -92,7 +92,7 @@ setup(name="django-mellon",
           'python-dateutil',
       ],
       setup_requires=[
-          'django',
+          'django>=1.5,<1.7',
       ],
       tests_require=[
           'nose>=0.11.4',
